@@ -203,9 +203,10 @@
     <aside class="lg:col-span-2 space-y-3 flex flex-col">
 
       <div class="glass p-4">
-        <h2 class="font-bold mb-3 flex items-center gap-2" style="color:var(--text)">
+        <h2 class="font-bold mb-1 flex items-center gap-2" style="color:var(--text)">
           <span class="grad-text">🔍</span> Search Foods
         </h2>
+        <p class="text-xs mb-2" style="color:var(--muted)">USDA FoodData Central · values per 100 g</p>
         <div class="autocomplete-wrap">
           <div class="flex gap-2">
             <input id="search-input" class="inp flex-1" type="text" placeholder="e.g. chicken breast, rice…" autocomplete="off"/>
@@ -213,8 +214,7 @@
           </div>
           <div id="autocomplete-list" style="display:none"></div>
         </div>
-        <p class="text-xs mt-1.5" style="color:var(--muted)">USDA FoodData Central · values per 100 g</p>
-        <div id="search-results" class="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+        <div id="search-results" class="space-y-2 max-h-64 overflow-y-auto pr-1" style="display:none"></div>
       </div>
 
       <div class="glass p-4 flex-1">
@@ -581,9 +581,13 @@ function renderSearchResults(foods) {
   window._sr = foods;
   const el = document.getElementById('search-results');
   if(!foods.length){
-    el.innerHTML=`<p class="text-sm py-3" style="color:var(--muted)">No results. Try a different term.</p>`;
+    el.innerHTML=`<p class="text-sm py-2" style="color:var(--muted)">No results. Try a different term.</p>`;
+    el.style.display = 'block';
+    el.style.marginTop = '0.5rem';
     return;
   }
+  el.style.display = 'block';
+  el.style.marginTop = '0.5rem';
   el.innerHTML = foods.map((f,i) => `
     <div class="fade-in glass p-3">
       <p class="text-sm font-semibold mb-0.5" style="color:var(--text)">${f.description}</p>
@@ -597,6 +601,8 @@ async function searchFoods() {
   if(!q) return;
   hideAutocomplete();
   const el = document.getElementById('search-results');
+  el.style.display = 'block';
+  el.style.marginTop = '0.5rem';
   el.innerHTML=`<div class="flex items-center gap-2 text-sm py-3" style="color:var(--muted)">
     <svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
     Searching USDA database…</div>`;
