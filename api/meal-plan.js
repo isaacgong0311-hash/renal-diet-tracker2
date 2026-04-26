@@ -1,15 +1,30 @@
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+export const config = { runtime: "edge" };
 
-  if (req.method === "OPTIONS") return res.status(204).end();
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+export default async function handler(req) {
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers });
+
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers });
+  }
 
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
-  if (!GROQ_API_KEY) return res.status(500).json({ error: "GROQ_API_KEY not set" });
+  if (!GROQ_API_KEY) {
+    return new Response(JSON.stringify({ error: "GROQ_API_KEY not set" }), { status: 500, headers });
+  }
 
-  const { remaining = {}, loggedFoods = [], mealType = "meal" } = req.body || {};
+  let body = {};
+  try { body = await req.json(); } catch {}
+
+  const remaining   = body.remaining   || {};
+  const loggedFoods = body.loggedFoods || [];
+  const mealType    = body.mealType    || "meal";
 
   const alreadyEaten = loggedFoods.length
     ? `They have already eaten today: ${loggedFoods.join(", ")}. `
@@ -66,10 +81,19 @@ Rules:
     });
 
     const data = await groqRes.json();
-    if (!groqRes.ok) return res.status(500).json({ error: data.error?.message || "Groq API error" });
 
-    return res.status(200).json({ suggestion: data.choices[0].message.content });
+    if (!groqRes.ok) {
+      return new Response(
+        JSON.stringify({ error: data.error?.message || "Groq API error" }),
+        { status: 500, headers }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ suggestion: data.choices[0].message.content }),
+      { status: 200, headers }
+    );
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers });
   }
 }
