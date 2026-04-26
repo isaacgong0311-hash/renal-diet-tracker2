@@ -1,9 +1,10 @@
 import os
 import json
+import urllib.request
 from http.server import BaseHTTPRequestHandler
-from groq import Groq
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_URL     = "https://api.groq.com/openai/v1/chat/completions"
 
 
 class handler(BaseHTTPRequestHandler):
@@ -56,17 +57,32 @@ Rules:
 - Prioritize adequate protein (dialysis patients need ~1.2 g/kg/day)
 - Only suggest foods a person can realistically buy at a grocery store"""
 
+        payload = json.dumps({
+            "model": "llama-3.3-70b-versatile",
+            "max_tokens": 700,
+            "messages": [
+                {"role": "system", "content": "You are a compassionate renal dietitian. Be specific, concise, and practical."},
+                {"role": "user",   "content": prompt},
+            ],
+        }).encode()
+
+        req = urllib.request.Request(
+            GROQ_URL,
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type":  "application/json",
+            },
+        )
+
         try:
-            client = Groq(api_key=GROQ_API_KEY)
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                max_tokens=700,
-                messages=[
-                    {"role": "system", "content": "You are a compassionate renal dietitian. Be specific, concise, and practical."},
-                    {"role": "user",   "content": prompt},
-                ],
-            )
-            self._json({"suggestion": completion.choices[0].message.content}, 200)
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read())
+            suggestion = data["choices"][0]["message"]["content"]
+            self._json({"suggestion": suggestion}, 200)
+        except urllib.error.HTTPError as e:
+            err = e.read().decode()
+            self._json({"error": err}, 500)
         except Exception as e:
             self._json({"error": str(e)}, 500)
 
