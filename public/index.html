@@ -33,7 +33,6 @@
       overflow-x: hidden;
     }
 
-    /* animated mesh background */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: -1;
@@ -48,7 +47,6 @@
       100% { opacity:.85; transform:scale(1.08) rotate(2deg); }
     }
 
-    /* glass cards */
     .glass {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -59,7 +57,6 @@
     }
     .glass:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(99,102,241,0.12); }
 
-    /* progress bars */
     .pbar-track { height:10px; border-radius:9999px; background:rgba(99,102,241,0.1); overflow:visible; position:relative; }
     .pbar-fill  { height:100%; border-radius:9999px; transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1); position:relative; }
     .pbar-fill::after {
@@ -73,7 +70,6 @@
     @keyframes pulseWarn   { 0%,100%{opacity:1} 50%{opacity:.7} }
     @keyframes pulseDanger { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 70%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
 
-    /* buttons */
     .btn {
       display:inline-flex; align-items:center; gap:0.4rem;
       font-weight:600; border-radius:0.75rem;
@@ -88,9 +84,9 @@
     .btn-violet  { background:linear-gradient(135deg,#8b5cf6,#ec4899); color:#fff; box-shadow:0 4px 15px rgba(139,92,246,0.35); }
     .btn-emerald { background:linear-gradient(135deg,#10b981,#06b6d4); color:#fff; box-shadow:0 4px 15px rgba(16,185,129,0.3); }
     .btn-ghost   { background:var(--surface); color:var(--text); border:1px solid var(--border); }
+    .btn-icon    { padding:0.35rem 0.5rem; border-radius:0.5rem; font-size:.8rem; }
     .btn:disabled { opacity:.55; cursor:not-allowed; }
 
-    /* inputs */
     .inp {
       background:var(--surface); border:1px solid var(--border); color:var(--text);
       border-radius:.75rem; padding:.55rem .9rem; font-size:.875rem;
@@ -99,7 +95,6 @@
     .inp:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(99,102,241,.15); }
     .inp::placeholder { color:var(--muted); }
 
-    /* animations */
     .fade-in  { animation:fadeIn  .35s ease both; }
     .slide-in { animation:slideIn .35s ease both; }
     @keyframes fadeIn  { from{opacity:0;transform:translateY(8px)}  to{opacity:1;transform:translateY(0)} }
@@ -107,7 +102,6 @@
     .spinner { animation:spin .9s linear infinite; }
     @keyframes spin { to{transform:rotate(360deg)} }
 
-    /* toasts */
     #toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
     .toast {
       display:flex; align-items:center; gap:.6rem;
@@ -120,26 +114,47 @@
     @keyframes toastIn  { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
     @keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(40px)} }
 
-    /* ripple */
     .ripple { position:absolute; border-radius:50%; background:rgba(255,255,255,.35); transform:scale(0); animation:rippleAnim .5s ease-out; pointer-events:none; }
     @keyframes rippleAnim { to{transform:scale(4);opacity:0} }
 
-    /* gradient text */
     .grad-text { background:linear-gradient(135deg,#6366f1,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
-    /* dark toggle */
     .toggle-track { width:44px; height:24px; background:rgba(99,102,241,.25); border-radius:9999px; position:relative; cursor:pointer; transition:background .3s; }
     [data-theme="dark"] .toggle-track { background:rgba(99,102,241,.6); }
     .toggle-thumb { position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform .3s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
     [data-theme="dark"] .toggle-thumb { transform:translateX(20px); }
 
-    /* scrollbar */
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:rgba(99,102,241,.3); border-radius:9999px; }
 
-    /* nutrient badge */
     .nbadge { display:inline-block; padding:.1rem .45rem; border-radius:.4rem; font-size:.72rem; font-weight:600; }
+
+    /* autocomplete dropdown */
+    .autocomplete-wrap { position:relative; }
+    #autocomplete-list {
+      position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:200;
+      background:var(--surface); border:1px solid var(--border);
+      backdrop-filter:blur(16px); border-radius:.75rem;
+      overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.15);
+    }
+    .ac-item {
+      padding:.5rem .85rem; font-size:.82rem; cursor:pointer;
+      color:var(--text); border-bottom:1px solid var(--border);
+      transition:background .15s;
+    }
+    .ac-item:last-child { border-bottom:none; }
+    .ac-item:hover { background:rgba(99,102,241,.1); }
+
+    /* collapsible reminder */
+    #reminder-body { overflow:hidden; transition:max-height .3s ease, opacity .3s ease; }
+    #reminder-body.closed { max-height:0!important; opacity:0; }
+    #reminder-chevron { transition:transform .3s ease; display:inline-block; }
+    #reminder-chevron.open { transform:rotate(180deg); }
+
+    /* edit button */
+    .btn-edit { color:var(--muted); background:none; border:none; cursor:pointer; font-size:.85rem; padding:.25rem .4rem; border-radius:.4rem; transition:color .2s, background .2s; line-height:1; }
+    .btn-edit:hover { color:var(--accent); background:rgba(99,102,241,.1); }
   </style>
 </head>
 <body>
@@ -170,7 +185,7 @@
 </header>
 
 <!-- Main -->
-<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+<main class="max-w-7xl mx-auto px-4 py-4 space-y-4">
 
   <!-- Nutrient Dashboard -->
   <section>
@@ -178,56 +193,50 @@
       <h2 class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)">Daily Limits</h2>
       <button class="btn btn-ghost text-xs py-1 px-3" onclick="openLimitsModal()">⚙ Customize</button>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="nutrient-cards"></div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="nutrient-cards"></div>
   </section>
 
   <!-- Two columns -->
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-    <!-- LEFT sidebar -->
-    <aside class="lg:col-span-2 space-y-4">
+    <!-- LEFT sidebar: search + quick add -->
+    <aside class="lg:col-span-2 space-y-3 flex flex-col">
 
-      <div class="glass p-5">
+      <div class="glass p-4">
         <h2 class="font-bold mb-3 flex items-center gap-2" style="color:var(--text)">
           <span class="grad-text">🔍</span> Search Foods
         </h2>
-        <div class="flex gap-2">
-          <input id="search-input" class="inp flex-1" type="text" placeholder="e.g. chicken breast, rice…"/>
-          <button class="btn btn-primary" onclick="searchFoods()">Go</button>
+        <div class="autocomplete-wrap">
+          <div class="flex gap-2">
+            <input id="search-input" class="inp flex-1" type="text" placeholder="e.g. chicken breast, rice…" autocomplete="off"/>
+            <button class="btn btn-primary" onclick="searchFoods()">Go</button>
+          </div>
+          <div id="autocomplete-list" style="display:none"></div>
         </div>
-        <p class="text-xs mt-1.5" style="color:var(--muted)">USDA FoodData Central</p>
-        <div id="search-results" class="mt-3 space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+        <p class="text-xs mt-1.5" style="color:var(--muted)">USDA FoodData Central · values per 100 g</p>
+        <div id="search-results" class="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1"></div>
       </div>
 
-      <div class="glass p-5">
+      <div class="glass p-4 flex-1">
         <h2 class="font-bold mb-1 flex items-center gap-2" style="color:var(--text)">⚡ Quick Add</h2>
         <p class="text-xs mb-3" style="color:var(--muted)">Renal-friendly staples · per 100 g</p>
-        <div id="quick-add-list" class="space-y-1 max-h-72 overflow-y-auto pr-1"></div>
+        <div id="quick-add-list" class="space-y-1 overflow-y-auto pr-1" style="max-height:340px"></div>
       </div>
 
-      <div class="glass p-4" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)">
-        <p class="font-semibold text-sm mb-1.5" style="color:#d97706">⚠ Daily Limits Reminder</p>
-        <ul class="text-xs space-y-0.5 list-disc pl-4" style="color:var(--muted)">
-          <li>Potassium &lt; 2,000 mg — avoid bananas, potatoes, tomatoes</li>
-          <li>Phosphorus &lt; 1,000 mg — avoid dairy, nuts, dark colas</li>
-          <li>Sodium &lt; 2,000 mg — use herbs instead of salt</li>
-          <li>Fluid &lt; 1,500 mL — all beverages + food moisture</li>
-        </ul>
-      </div>
     </aside>
 
-    <!-- RIGHT -->
-    <div class="lg:col-span-3 space-y-4">
+    <!-- RIGHT: log + AI planner -->
+    <div class="lg:col-span-3 space-y-3 flex flex-col">
 
-      <div class="glass p-5">
-        <div class="flex items-center justify-between mb-4">
+      <div class="glass p-5 flex flex-col" style="flex:1;min-height:340px">
+        <div class="flex items-center justify-between mb-3">
           <h2 class="font-bold flex items-center gap-2" style="color:var(--text)">
             📋 Today's Log
             <span id="log-count" class="text-xs font-normal px-2 py-0.5 rounded-full" style="background:rgba(99,102,241,.12);color:var(--accent)"></span>
           </h2>
           <button class="btn btn-ghost text-xs py-1 px-3" onclick="clearLog()">🗑 Clear all</button>
         </div>
-        <div id="food-log-container"></div>
+        <div id="food-log-container" class="flex-1 overflow-y-auto"></div>
       </div>
 
       <div class="glass p-5" style="border-color:rgba(139,92,246,.25)">
@@ -254,9 +263,30 @@
 
     </div>
   </div>
+
+  <!-- Daily Limits Reminder — collapsible full-width bar -->
+  <div class="glass" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)">
+    <button
+      onclick="toggleReminder()"
+      class="w-full flex items-center justify-between px-5 py-3 text-left"
+      style="background:none;border:none;cursor:pointer;color:#d97706"
+    >
+      <span class="font-semibold text-sm flex items-center gap-2">⚠ Daily Limits Reminder</span>
+      <span id="reminder-chevron" class="text-xs" style="color:#d97706">▼</span>
+    </button>
+    <div id="reminder-body" class="closed" style="max-height:200px">
+      <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs px-5 pb-4" style="color:var(--muted);list-style:disc;padding-left:2rem">
+        <li>Potassium &lt; 2,000 mg — avoid bananas, potatoes, tomatoes</li>
+        <li>Phosphorus &lt; 1,000 mg — avoid dairy, nuts, dark colas</li>
+        <li>Sodium &lt; 2,000 mg — use herbs instead of salt</li>
+        <li>Fluid &lt; 1,500 mL — all beverages + food moisture</li>
+      </ul>
+    </div>
+  </div>
+
 </main>
 
-<!-- Serving Modal -->
+<!-- Add / Serving Modal -->
 <div id="modal-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4" style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)">
   <div class="glass p-6 w-full max-w-sm fade-in">
     <h3 class="font-bold text-lg mb-0.5" style="color:var(--text)" id="modal-food-name"></h3>
@@ -267,6 +297,21 @@
     <div class="flex gap-3">
       <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary flex-1" onclick="confirmAdd()">Add to Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4" style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)">
+  <div class="glass p-6 w-full max-w-sm fade-in">
+    <h3 class="font-bold text-lg mb-0.5" style="color:var(--text)" id="edit-modal-food-name"></h3>
+    <p class="text-xs mb-4" style="color:var(--muted)">Adjust serving size to update nutrient totals</p>
+    <label class="block text-sm font-semibold mb-1" style="color:var(--text)">Serving size (grams)</label>
+    <input id="edit-serving-input" class="inp mb-2" type="number" min="1" max="2000" value="100"/>
+    <p class="text-xs mb-4" style="color:var(--accent)" id="edit-serving-preview"></p>
+    <div class="flex gap-3">
+      <button class="btn btn-ghost flex-1" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary flex-1" onclick="saveEdit()">Save</button>
     </div>
   </div>
 </div>
@@ -293,6 +338,9 @@ const DEFAULT_LIMITS = { k:2000, p:1000, na:2000, fluid:1500 };
 let LIMITS = {...DEFAULT_LIMITS};
 let log = [], nextId = 1, pendingFood = null;
 let prevTotals = { k:0, p:0, na:0, fluid:0 };
+let editingId = null, editingBaseFood = null;
+let searchDebounceTimer = null;
+let _lastAcQuery = '';
 
 const QUICK_FOODS = [
   { name:"White rice, cooked",        k:29,  p:43,  na:1,   fluid:69, cal:130, protein:2.7 },
@@ -318,7 +366,6 @@ const pct = (v,l) => Math.min(100,(v/l)*100);
 const barCls = p => p>=100?'pbar-danger':p>=75?'pbar-warn':'pbar-safe';
 const fmt = (n,d=0) => Number(n).toFixed(d);
 
-// animated counter
 function animCounter(el, from, to, dur=600) {
   const s = performance.now();
   const step = ts => {
@@ -329,7 +376,6 @@ function animCounter(el, from, to, dur=600) {
   requestAnimationFrame(step);
 }
 
-// toast
 function toast(msg, icon='✅') {
   const el = document.createElement('div');
   el.className = 'toast';
@@ -338,14 +384,25 @@ function toast(msg, icon='✅') {
   setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),350); }, 2800);
 }
 
-// dark mode
 function toggleDark() {
   const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',t);
   localStorage.setItem('theme',t);
 }
 
-// ripple
+function toggleReminder() {
+  const body = document.getElementById('reminder-body');
+  const chevron = document.getElementById('reminder-chevron');
+  const isOpen = !body.classList.contains('closed');
+  if (isOpen) {
+    body.classList.add('closed');
+    chevron.classList.remove('open');
+  } else {
+    body.classList.remove('closed');
+    chevron.classList.add('open');
+  }
+}
+
 document.addEventListener('click', e => {
   const btn = e.target.closest('.btn');
   if(!btn) return;
@@ -355,7 +412,6 @@ document.addEventListener('click', e => {
   btn.appendChild(r); setTimeout(()=>r.remove(),500);
 });
 
-// render nutrient cards
 function renderNutrientCards() {
   const t = totals();
   const cards = [
@@ -385,7 +441,6 @@ function renderNutrientCards() {
   prevTotals = {k:t.k,p:t.p,na:t.na,fluid:t.fluid};
 }
 
-// render log
 function renderLog() {
   const el=document.getElementById('food-log-container');
   const cnt=document.getElementById('log-count');
@@ -407,17 +462,20 @@ function renderLog() {
       <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#ec4899">Na</th>
       <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:var(--muted)">Fluid</th>
       <th class="pb-2 text-xs font-bold text-right" style="color:var(--muted)">Cal</th>
-      <th class="pb-2 pl-2"></th>
+      <th class="pb-2 pl-2 text-xs font-bold" style="color:var(--muted)"></th>
     </tr></thead>
     <tbody>${log.map(item=>`<tr class="slide-in" style="border-bottom:1px solid var(--border)">
-      <td class="py-2 pr-2 text-sm font-medium" style="color:var(--text)">${item.name}</td>
+      <td class="py-2 pr-2 text-sm font-medium" style="color:var(--text);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${item.name}">${item.name}</td>
       <td class="py-2 pr-2 text-xs" style="color:var(--muted)">${item.serving}</td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(99,102,241,.12);color:#6366f1">${fmt(item.k)}</span></td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(139,92,246,.12);color:#8b5cf6">${fmt(item.p)}</span></td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(236,72,153,.12);color:#ec4899">${fmt(item.na)}</span></td>
       <td class="py-2 pr-2 text-xs text-right" style="color:var(--muted)">${fmt(item.fluid)}</td>
       <td class="py-2 text-xs text-right" style="color:var(--muted)">${fmt(item.cal)}</td>
-      <td class="py-2 pl-2"><button onclick="removeItem(${item.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-size:.85rem" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button></td>
+      <td class="py-2 pl-2 flex items-center gap-1">
+        <button class="btn-edit" onclick="openEditModal(${item.id})" title="Edit serving">✎</button>
+        <button onclick="removeItem(${item.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-size:.85rem;padding:.25rem .4rem;border-radius:.4rem" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button>
+      </td>
     </tr>`).join('')}</tbody>
     <tfoot><tr style="border-top:2px solid var(--border)">
       <td class="pt-2 text-sm font-bold" style="color:var(--text)" colspan="2">Total</td>
@@ -430,7 +488,6 @@ function renderLog() {
   </table></div>`;
 }
 
-// render quick add
 function renderQuickAdd() {
   document.getElementById('quick-add-list').innerHTML = QUICK_FOODS.map((f,i)=>`
     <div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border)">
@@ -442,7 +499,7 @@ function renderQuickAdd() {
     </div>`).join('');
 }
 
-// modal
+// ── Add modal ──
 function openModal(food) {
   pendingFood=food;
   document.getElementById('modal-food-name').textContent=food.name;
@@ -462,12 +519,42 @@ function updateServingPreview() {
 function confirmAdd() {
   const g=parseFloat(document.getElementById('serving-input').value)||100;
   const s=scale(pendingFood,g);
-  log.push({id:nextId++,name:pendingFood.name,serving:g,...s});
+  log.push({id:nextId++,name:pendingFood.name,serving:g,_base:pendingFood,...s});
   closeModal(); renderAll();
   toast(`Added ${pendingFood.name}`,'🍽');
 }
 
-// limits modal
+// ── Edit modal ──
+function openEditModal(id) {
+  const item = log.find(i=>i.id===id);
+  if(!item) return;
+  editingId = id;
+  editingBaseFood = item._base || {k:item.k/(item.serving/100),p:item.p/(item.serving/100),na:item.na/(item.serving/100),fluid:item.fluid/(item.serving/100),cal:item.cal/(item.serving/100),protein:item.protein/(item.serving/100)};
+  document.getElementById('edit-modal-food-name').textContent = item.name;
+  document.getElementById('edit-serving-input').value = item.serving;
+  updateEditPreview();
+  document.getElementById('edit-modal-backdrop').style.display='flex';
+  setTimeout(()=>document.getElementById('edit-serving-input').focus(),50);
+}
+function closeEditModal() { document.getElementById('edit-modal-backdrop').style.display='none'; editingId=null; editingBaseFood=null; }
+function updateEditPreview() {
+  const g = parseFloat(document.getElementById('edit-serving-input').value)||0;
+  if(!editingBaseFood) return;
+  const s = scale(editingBaseFood,g);
+  document.getElementById('edit-serving-preview').textContent=`→ K:${s.k} mg · P:${s.p} mg · Na:${s.na} mg · Fluid:${s.fluid} mL · ${s.cal} kcal`;
+}
+function saveEdit() {
+  const g = parseFloat(document.getElementById('edit-serving-input').value)||100;
+  const idx = log.findIndex(i=>i.id===editingId);
+  if(idx===-1){ closeEditModal(); return; }
+  const s = scale(editingBaseFood, g);
+  log[idx] = {...log[idx], serving:g, ...s};
+  closeEditModal();
+  renderAll();
+  toast(`Updated ${log.find((_,i)=>i===idx)?.name || 'item'}`,'✏️');
+}
+
+// ── Limits modal ──
 function openLimitsModal() {
   document.getElementById('lim-k').value=LIMITS.k;
   document.getElementById('lim-p').value=LIMITS.p;
@@ -484,30 +571,89 @@ function saveLimits() {
   closeLimitsModal(); renderAll(); toast('Limits updated','⚙');
 }
 
-// search
+// ── Search ──
+async function fetchFoods(q) {
+  const foods = await (await fetch(`/api/food-search?q=${encodeURIComponent(q)}`)).json();
+  return foods;
+}
+
+function renderSearchResults(foods) {
+  window._sr = foods;
+  const el = document.getElementById('search-results');
+  if(!foods.length){
+    el.innerHTML=`<p class="text-sm py-3" style="color:var(--muted)">No results. Try a different term.</p>`;
+    return;
+  }
+  el.innerHTML = foods.map((f,i) => `
+    <div class="fade-in glass p-3">
+      <p class="text-sm font-semibold mb-0.5" style="color:var(--text)">${f.description}</p>
+      <p class="text-xs mb-2" style="color:var(--muted)">K:${fmt(f.potassium)} mg · P:${fmt(f.phosphorus)} mg · Na:${fmt(f.sodium)} mg · ${fmt(f.calories)} kcal <span style="opacity:.6">per 100g</span></p>
+      <button class="btn btn-primary text-xs py-1 px-3" onclick="openModal({name:window._sr[${i}].description,k:window._sr[${i}].potassium,p:window._sr[${i}].phosphorus,na:window._sr[${i}].sodium,fluid:window._sr[${i}].water,cal:window._sr[${i}].calories,protein:window._sr[${i}].protein})">+ Add to Log</button>
+    </div>`).join('');
+}
+
 async function searchFoods() {
-  const q=document.getElementById('search-input').value.trim();
+  const q = document.getElementById('search-input').value.trim();
   if(!q) return;
-  const el=document.getElementById('search-results');
+  hideAutocomplete();
+  const el = document.getElementById('search-results');
   el.innerHTML=`<div class="flex items-center gap-2 text-sm py-3" style="color:var(--muted)">
     <svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
     Searching USDA database…</div>`;
   try {
-    const foods=await (await fetch(`/api/food-search?q=${encodeURIComponent(q)}`)).json();
-    window._sr=foods;
-    if(!foods.length){el.innerHTML=`<p class="text-sm py-3" style="color:var(--muted)">No results. Try a different term.</p>`;return;}
-    el.innerHTML=foods.map((f,i)=>`
-      <div class="fade-in glass p-3">
-        <p class="text-sm font-semibold mb-1" style="color:var(--text)">${f.description}</p>
-        <p class="text-xs mb-2" style="color:var(--muted)">K:${fmt(f.potassium)} · P:${fmt(f.phosphorus)} · Na:${fmt(f.sodium)} per 100g</p>
-        <button class="btn btn-primary text-xs py-1 px-3" onclick="openModal({name:window._sr[${i}].description,k:window._sr[${i}].potassium,p:window._sr[${i}].phosphorus,na:window._sr[${i}].sodium,fluid:window._sr[${i}].water,cal:window._sr[${i}].calories,protein:window._sr[${i}].protein})">+ Add to Log</button>
-      </div>`).join('');
+    const foods = await fetchFoods(q);
+    renderSearchResults(foods);
   } catch(e) {
     el.innerHTML=`<p class="text-sm py-3" style="color:#ef4444">Search failed: ${e.message}</p>`;
   }
 }
 
-// AI planner
+// autocomplete: search as you type with debounce
+function hideAutocomplete() {
+  const ac = document.getElementById('autocomplete-list');
+  ac.style.display = 'none';
+  ac.innerHTML = '';
+}
+
+function setupAutoSearch() {
+  const input = document.getElementById('search-input');
+  input.addEventListener('input', () => {
+    clearTimeout(searchDebounceTimer);
+    const q = input.value.trim();
+    if(q.length < 3){ hideAutocomplete(); return; }
+    searchDebounceTimer = setTimeout(async () => {
+      if(q !== input.value.trim()) return; // stale
+      try {
+        const foods = await fetchFoods(q);
+        const ac = document.getElementById('autocomplete-list');
+        if(!foods.length || input.value.trim() !== q){ hideAutocomplete(); return; }
+        // show top 6 as autocomplete suggestions
+        ac.innerHTML = foods.slice(0,6).map((f,i) =>
+          `<div class="ac-item" data-idx="${i}">${f.description} <span style="color:var(--muted);font-size:.75rem">· K:${fmt(f.potassium)} P:${fmt(f.phosphorus)} Na:${fmt(f.sodium)}</span></div>`
+        ).join('');
+        window._acFoods = foods;
+        ac.style.display = 'block';
+        ac.querySelectorAll('.ac-item').forEach(el => {
+          el.addEventListener('mousedown', e => {
+            e.preventDefault();
+            const f = window._acFoods[+el.dataset.idx];
+            input.value = f.description;
+            hideAutocomplete();
+            renderSearchResults(window._acFoods);
+          });
+        });
+      } catch(_) { hideAutocomplete(); }
+    }, 420);
+  });
+
+  input.addEventListener('blur', () => setTimeout(hideAutocomplete, 150));
+  input.addEventListener('keydown', e => {
+    if(e.key==='Enter'){ clearTimeout(searchDebounceTimer); searchFoods(); }
+    if(e.key==='Escape') hideAutocomplete();
+  });
+}
+
+// ── AI planner ──
 async function getMealSuggestion() {
   const btn=document.getElementById('suggest-btn');
   const el=document.getElementById('ai-suggestion-container');
@@ -573,10 +719,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(saved) document.documentElement.setAttribute('data-theme',saved);
   document.getElementById('date-display').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   renderQuickAdd(); renderAll();
-  document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')searchFoods();});
+  setupAutoSearch();
   document.getElementById('serving-input').addEventListener('input',updateServingPreview);
   document.getElementById('serving-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAdd();});
+  document.getElementById('edit-serving-input').addEventListener('input',updateEditPreview);
+  document.getElementById('edit-serving-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
   document.getElementById('modal-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('modal-backdrop'))closeModal();});
+  document.getElementById('edit-modal-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('edit-modal-backdrop'))closeEditModal();});
   document.getElementById('limits-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('limits-backdrop'))closeLimitsModal();});
 });
 </script>
