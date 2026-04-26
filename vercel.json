@@ -1,13 +1,5 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/food-search.py", "use": "@vercel/python" },
-    { "src": "api/meal-plan.py",   "use": "@vercel/python" },
-    { "src": "public/**",          "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/api/food-search", "dest": "api/food-search.py" },
-    { "src": "/api/meal-plan",   "dest": "api/meal-plan.py"   },
-    { "src": "/(.*)",            "dest": "public/$1"          }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/public/$1" }
   ]
 }
