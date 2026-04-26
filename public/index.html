@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RenalGuide — Dialysis Diet Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .progress-bar { transition: width 0.5s ease-out; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .markdown-body strong { font-weight: 700; }
+    .markdown-body ul  { list-style: disc; padding-left: 1.25rem; }
+    .markdown-body p   { margin-bottom: 0.5rem; }
+    /* custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
+
+<!-- ── Header ────────────────────────────────────────────────── -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow">
+        <!-- kidney / drop icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-slate-900 leading-tight">RenalGuide</h1>
+        <p class="text-xs text-slate-400">Dialysis Diet Tracker</p>
+      </div>
+    </div>
+    <div class="text-right">
+      <p class="text-sm font-semibold text-slate-700" id="date-display"></p>
+      <p class="text-xs text-slate-400">Today's nutrition log</p>
+    </div>
+  </div>
+</header>
+
+<!-- ── Main ──────────────────────────────────────────────────── -->
+<main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+  <!-- Nutrient Dashboard -->
+  <section>
+    <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Daily Limits</h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="nutrient-cards"></div>
+  </section>
+
+  <!-- Body -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+    <!-- LEFT: Food Search -->
+    <aside class="lg:col-span-2 space-y-4">
+
+      <!-- Search -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h2 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+          <span class="text-indigo-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+            </svg>
+          </span>
+          Search Foods
+        </h2>
+        <div class="flex gap-2">
+          <input id="search-input" type="text"
+            placeholder="e.g. chicken breast, white rice…"
+            class="flex-1 text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-slate-400"
+          />
+          <button onclick="searchFoods()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition-colors">
+            Search
+          </button>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">Powered by USDA FoodData Central</p>
+        <div id="search-results" class="mt-3 space-y-2 max-h-80 overflow-y-auto"></div>
+      </div>
+
+      <!-- Quick Add -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h2 class="font-semibold text-slate-800 mb-1 flex items-center gap-2">
+          <span class="text-emerald-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+          </span>
+          Quick Add
+        </h2>
+        <p class="text-xs text-slate-400 mb-3">Renal-friendly staples (per 100 g)</p>
+        <div id="quick-add-list" class="space-y-1.5"></div>
+      </div>
+
+      <!-- Legend -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800">
+        <p class="font-semibold mb-1">⚠️ Dialysis Dietary Rules</p>
+        <ul class="space-y-0.5 list-disc pl-4">
+          <li>Potassium &lt; 2,000 mg/day — avoid bananas, potatoes, tomatoes</li>
+          <li>Phosphorus &lt; 1,000 mg/day — avoid dairy, nuts, dark colas</li>
+          <li>Sodium &lt; 2,000 mg/day — use herbs instead of salt</li>
+          <li>Fluid &lt; 1,500 mL/day — includes all beverages + food moisture</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Log + AI Planner -->
+    <div class="lg:col-span-3 space-y-4">
+
+      <!-- Food Log -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold text-slate-800 flex items-center gap-2">
+            <span class="text-indigo-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 0 2-2h2a2 2 0 0 0 2 2"/>
+              </svg>
+            </span>
+            Today's Log
+          </h2>
+          <button onclick="clearLog()"
+            class="text-xs text-slate-400 hover:text-red-500 transition-colors">
+            Clear all
+          </button>
+        </div>
+        <div id="food-log-container"></div>
+      </div>
+
+      <!-- AI Meal Planner -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h2 class="font-semibold text-slate-800 mb-1 flex items-center gap-2">
+          <span class="text-violet-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m1.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </span>
+          AI Meal Planner
+        </h2>
+        <p class="text-xs text-slate-400 mb-4">Claude suggests a meal that fits your remaining daily allowances</p>
+
+        <div class="flex gap-3 mb-4">
+          <select id="meal-type"
+            class="flex-1 text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400">
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner" selected>Dinner</option>
+            <option value="snack">Snack</option>
+          </select>
+          <button onclick="getMealSuggestion()" id="suggest-btn"
+            class="bg-violet-600 hover:bg-violet-700 text-white text-sm px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Suggest Meal
+          </button>
+        </div>
+
+        <div id="ai-suggestion-container"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ── Add Serving Modal ──────────────────────────────────────── -->
+<div id="serving-modal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 fade-in">
+    <h3 class="font-bold text-slate-800 text-lg mb-1" id="modal-food-name"></h3>
+    <p class="text-xs text-slate-400 mb-4" id="modal-food-details"></p>
+    <label class="block text-sm font-medium text-slate-700 mb-1">Serving size (grams)</label>
+    <input id="serving-input" type="number" min="1" max="2000" value="100"
+      class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4" />
+    <p class="text-xs text-slate-500 mb-4" id="serving-preview"></p>
+    <div class="flex gap-3">
+      <button onclick="closeModal()" class="flex-1 border border-slate-300 text-slate-700 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-colors">Cancel</button>
+      <button onclick="confirmAdd()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-2 text-sm font-medium transition-colors">Add to Log</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+const LIMITS = { k: 2000, p: 1000, na: 2000, fluid: 1500 };
+
+const state = {
+  log: [],       // [{id, name, serving, k, p, na, fluid, cal, protein}]
+  pendingFood: null,
+};
+
+let nextId = 1;
+
+// ── Quick-add foods (nutrients per 100 g) ─────────────────────
+const QUICK_FOODS = [
+  { name: "White rice, cooked",     k: 29,  p: 43,  na: 1,   fluid: 69,  cal: 130, protein: 2.7 },
+  { name: "Pasta, cooked",          k: 26,  p: 53,  na: 1,   fluid: 66,  cal: 131, protein: 5.0 },
+  { name: "White bread (1 slice≈30g)", k: 33, p: 25, na: 127, fluid: 13, cal: 79,  protein: 2.7 },
+  { name: "Chicken breast, roasted",k: 256, p: 220, na: 74,  fluid: 65,  cal: 165, protein: 31  },
+  { name: "Egg, whole scrambled",   k: 138, p: 172, na: 146, fluid: 73,  cal: 149, protein: 10  },
+  { name: "Egg whites only",        k: 163, p: 15,  na: 166, fluid: 88,  cal: 52,  protein: 11  },
+  { name: "Green beans, boiled",    k: 152, p: 30,  na: 4,   fluid: 89,  cal: 31,  protein: 1.9 },
+  { name: "Cabbage, boiled",        k: 147, p: 21,  na: 16,  fluid: 93,  cal: 23,  protein: 1.3 },
+  { name: "Cauliflower, boiled",    k: 142, p: 32,  na: 9,   fluid: 92,  cal: 23,  protein: 1.8 },
+  { name: "Apple (no skin)",        k: 90,  p: 7,   na: 0,   fluid: 86,  cal: 48,  protein: 0.2 },
+  { name: "Blueberries",            k: 77,  p: 12,  na: 1,   fluid: 84,  cal: 57,  protein: 0.7 },
+  { name: "Cream cheese",           k: 119, p: 98,  na: 314, fluid: 54,  cal: 342, protein: 5.9 },
+  { name: "Butter, unsalted",       k: 24,  p: 24,  na: 11,  fluid: 16,  cal: 717, protein: 0.9 },
+  { name: "Olive oil (1 tbsp≈14g)", k: 0,   p: 0,   na: 0,   fluid: 0,   cal: 119, protein: 0   },
+];
+
+// ── Helpers ───────────────────────────────────────────────────
+function totals() {
+  return state.log.reduce(
+    (acc, item) => ({
+      k:     acc.k     + item.k,
+      p:     acc.p     + item.p,
+      na:    acc.na    + item.na,
+      fluid: acc.fluid + item.fluid,
+    }),
+    { k: 0, p: 0, na: 0, fluid: 0 }
+  );
+}
+
+function remaining() {
+  const t = totals();
+  return {
+    k:     Math.max(0, LIMITS.k     - t.k),
+    p:     Math.max(0, LIMITS.p     - t.p),
+    na:    Math.max(0, LIMITS.na    - t.na),
+    fluid: Math.max(0, LIMITS.fluid - t.fluid),
+  };
+}
+
+function scale(food, servingG) {
+  const f = servingG / 100;
+  return {
+    k:     +(food.k     * f).toFixed(1),
+    p:     +(food.p     * f).toFixed(1),
+    na:    +(food.na    * f).toFixed(1),
+    fluid: +(food.fluid * f).toFixed(1),
+    cal:   +(food.cal   * f).toFixed(1),
+    protein: +(food.protein * f).toFixed(1),
+  };
+}
+
+function barColor(pct) {
+  if (pct >= 100) return "bg-red-500";
+  if (pct >= 80)  return "bg-amber-400";
+  return "bg-emerald-500";
+}
+
+function nutrientBadge(val, limit) {
+  const pct = (val / limit) * 100;
+  if (pct >= 100) return "bg-red-100 text-red-700";
+  if (pct >= 70)  return "bg-amber-100 text-amber-700";
+  return "bg-emerald-100 text-emerald-700";
+}
+
+function fmt(n, decimals = 0) {
+  return Number(n).toFixed(decimals);
+}
+
+// ── Render: Nutrient Cards ────────────────────────────────────
+function renderNutrientCards() {
+  const t = totals();
+  const cards = [
+    { label: "Potassium",  key: "k",     val: t.k,     limit: LIMITS.k,     unit: "mg",  emoji: "🫘" },
+    { label: "Phosphorus", key: "p",     val: t.p,     limit: LIMITS.p,     unit: "mg",  emoji: "🧪" },
+    { label: "Sodium",     key: "na",    val: t.na,    limit: LIMITS.na,    unit: "mg",  emoji: "🧂" },
+    { label: "Fluid",      key: "fluid", val: t.fluid, limit: LIMITS.fluid, unit: "mL",  emoji: "💧" },
+  ];
+
+  const container = document.getElementById("nutrient-cards");
+  container.innerHTML = cards.map(c => {
+    const pct     = Math.min(100, (c.val / c.limit) * 100);
+    const color   = barColor(pct);
+    const textClr = pct >= 100 ? "text-red-600" : pct >= 80 ? "text-amber-600" : "text-slate-700";
+
+    return `
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">${c.emoji} ${c.label}</span>
+          <span class="text-xs font-bold ${textClr}">${fmt(c.val)} / ${c.limit} ${c.unit}</span>
+        </div>
+        <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div class="h-full ${color} rounded-full progress-bar" style="width:${pct}%"></div>
+        </div>
+        <p class="text-xs text-slate-400 mt-1.5">${fmt(Math.max(0, c.limit - c.val))} ${c.unit} remaining</p>
+      </div>`;
+  }).join("");
+}
+
+// ── Render: Food Log ──────────────────────────────────────────
+function renderLog() {
+  const container = document.getElementById("food-log-container");
+
+  if (state.log.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-10 text-slate-400">
+        <div class="text-4xl mb-2">🥗</div>
+        <p class="text-sm">No foods logged yet.</p>
+        <p class="text-xs mt-1">Search or quick-add a food to get started.</p>
+      </div>`;
+    return;
+  }
+
+  const t = totals();
+
+  const rows = state.log.map(item => `
+    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+      <td class="py-2 pr-3 text-sm text-slate-800 font-medium">${item.name}</td>
+      <td class="py-2 pr-3 text-xs text-slate-500 whitespace-nowrap">${item.serving} g</td>
+      <td class="py-2 pr-3 text-xs text-right"><span class="px-1.5 py-0.5 rounded ${nutrientBadge(item.k, LIMITS.k)}">${fmt(item.k)}</span></td>
+      <td class="py-2 pr-3 text-xs text-right"><span class="px-1.5 py-0.5 rounded ${nutrientBadge(item.p, LIMITS.p)}">${fmt(item.p)}</span></td>
+      <td class="py-2 pr-3 text-xs text-right"><span class="px-1.5 py-0.5 rounded ${nutrientBadge(item.na, LIMITS.na)}">${fmt(item.na)}</span></td>
+      <td class="py-2 pr-3 text-xs text-right text-slate-500">${fmt(item.fluid)}</td>
+      <td class="py-2 text-xs text-right text-slate-400">${fmt(item.cal)} kcal</td>
+      <td class="py-2 pl-3">
+        <button onclick="removeItem(${item.id})" class="text-slate-300 hover:text-red-400 transition-colors text-xs">✕</button>
+      </td>
+    </tr>`).join("");
+
+  container.innerHTML = `
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b-2 border-slate-100">
+            <th class="pb-2 text-xs font-semibold text-slate-500 pr-3">Food</th>
+            <th class="pb-2 text-xs font-semibold text-slate-500 pr-3">Serving</th>
+            <th class="pb-2 text-xs font-semibold text-slate-500 pr-3 text-right">K (mg)</th>
+            <th class="pb-2 text-xs font-semibold text-slate-500 pr-3 text-right">P (mg)</th>
+            <th class="pb-2 text-xs font-semibold text-slate-500 pr-3 text-right">Na (mg)</th>
+            <th class="pb-2 text-xs font-semibold text-slate-500 pr-3 text-right">Fluid (mL)</th>
+            <th class="pb-2 text-xs font-semibold text-slate-500 text-right">Cal</th>
+            <th class="pb-2 pl-3"></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          <tr class="border-t-2 border-slate-200 font-semibold bg-slate-50">
+            <td class="pt-2 text-sm text-slate-700" colspan="2">Total</td>
+            <td class="pt-2 text-xs text-right pr-3 ${t.k  > LIMITS.k  ? 'text-red-600' : 'text-slate-700'}">${fmt(t.k)}</td>
+            <td class="pt-2 text-xs text-right pr-3 ${t.p  > LIMITS.p  ? 'text-red-600' : 'text-slate-700'}">${fmt(t.p)}</td>
+            <td class="pt-2 text-xs text-right pr-3 ${t.na > LIMITS.na ? 'text-red-600' : 'text-slate-700'}">${fmt(t.na)}</td>
+            <td class="pt-2 text-xs text-right pr-3 ${t.fluid > LIMITS.fluid ? 'text-red-600' : 'text-slate-700'}">${fmt(t.fluid)}</td>
+            <td class="pt-2 text-xs text-right text-slate-700" colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>`;
+}
+
+// ── Render: Quick Add ─────────────────────────────────────────
+function renderQuickAdd() {
+  const container = document.getElementById("quick-add-list");
+  container.innerHTML = QUICK_FOODS.map((food, i) => `
+    <div class="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-0">
+      <div class="flex-1 min-w-0">
+        <p class="text-sm text-slate-700 truncate">${food.name}</p>
+        <p class="text-xs text-slate-400">K:${food.k} P:${food.p} Na:${food.na} per 100g</p>
+      </div>
+      <button onclick="openModalForQuickFood(${i})"
+        class="ml-2 text-xs bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-600 rounded-lg px-2.5 py-1 transition-colors font-medium">
+        + Add
+      </button>
+    </div>`).join("");
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function openModal(food) {
+  state.pendingFood = food;
+  document.getElementById("modal-food-name").textContent = food.name;
+  document.getElementById("modal-food-details").textContent =
+    `Per 100 g — K: ${food.k} mg · P: ${food.p} mg · Na: ${food.na} mg · Fluid: ${food.fluid} mL`;
+  document.getElementById("serving-input").value = 100;
+  updateServingPreview();
+  document.getElementById("serving-modal").classList.remove("hidden");
+  document.getElementById("serving-input").focus();
+}
+
+function closeModal() {
+  document.getElementById("serving-modal").classList.add("hidden");
+  state.pendingFood = null;
+}
+
+function updateServingPreview() {
+  const g = parseFloat(document.getElementById("serving-input").value) || 0;
+  const f = state.pendingFood;
+  if (!f) return;
+  const s = scale(f, g);
+  document.getElementById("serving-preview").textContent =
+    `→ K: ${s.k} mg · P: ${s.p} mg · Na: ${s.na} mg · Fluid: ${s.fluid} mL · ${s.cal} kcal`;
+}
+
+function confirmAdd() {
+  const g = parseFloat(document.getElementById("serving-input").value) || 100;
+  const f = state.pendingFood;
+  if (!f) return;
+  const s = scale(f, g);
+  state.log.push({
+    id:      nextId++,
+    name:    f.name,
+    serving: g,
+    ...s,
+  });
+  closeModal();
+  renderAll();
+}
+
+function openModalForQuickFood(i) {
+  openModal(QUICK_FOODS[i]);
+}
+
+// ── Search ────────────────────────────────────────────────────
+async function searchFoods() {
+  const q = document.getElementById("search-input").value.trim();
+  if (!q) return;
+  const container = document.getElementById("search-results");
+  container.innerHTML = `<div class="flex items-center gap-2 text-slate-400 text-sm py-3"><svg class="w-4 h-4 spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Searching…</div>`;
+
+  try {
+    const resp = await fetch(`/api/food-search?q=${encodeURIComponent(q)}`);
+    const foods = await resp.json();
+
+    if (!foods.length) {
+      container.innerHTML = `<p class="text-sm text-slate-400 py-3">No results found. Try a different term.</p>`;
+      return;
+    }
+
+    container.innerHTML = foods.map((food, i) => `
+      <div class="fade-in border border-slate-100 rounded-xl p-3 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all">
+        <p class="text-sm font-medium text-slate-800 leading-snug mb-1">${food.description}</p>
+        <p class="text-xs text-slate-400 mb-2">K: ${fmt(food.potassium)} · P: ${fmt(food.phosphorus)} · Na: ${fmt(food.sodium)} · Fluid: ${fmt(food.water)} mL (per 100 g)</p>
+        <button onclick='openModalForSearchFood(${JSON.stringify(i)})'
+          class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-3 py-1 font-medium transition-colors">
+          + Add to Log
+        </button>
+      </div>`).join("");
+
+    // Store search results for modal access
+    window._searchResults = foods;
+  } catch (err) {
+    container.innerHTML = `<p class="text-sm text-red-500 py-3">Search failed: ${err.message}</p>`;
+  }
+}
+
+function openModalForSearchFood(i) {
+  const food = window._searchResults[i];
+  openModal({
+    name:    food.description,
+    k:       food.potassium,
+    p:       food.phosphorus,
+    na:      food.sodium,
+    fluid:   food.water,
+    cal:     food.calories,
+    protein: food.protein,
+  });
+}
+
+// ── AI Meal Planner ───────────────────────────────────────────
+async function getMealSuggestion() {
+  const btn       = document.getElementById("suggest-btn");
+  const container = document.getElementById("ai-suggestion-container");
+  const mealType  = document.getElementById("meal-type").value;
+  const rem       = remaining();
+
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="w-4 h-4 spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Generating…`;
+
+  container.innerHTML = `
+    <div class="bg-violet-50 border border-violet-100 rounded-xl p-4 text-sm text-violet-400 flex items-center gap-2">
+      <svg class="w-4 h-4 spinner flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Claude is designing a renal-safe ${mealType} for you…
+    </div>`;
+
+  try {
+    const loggedFoods = state.log.map(i => i.name);
+    const resp = await fetch("/api/meal-plan", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        remaining: { potassium: rem.k, phosphorus: rem.p, sodium: rem.na, fluid: rem.fluid },
+        loggedFoods,
+        mealType,
+      }),
+    });
+    const data = await resp.json();
+
+    if (data.error) throw new Error(data.error);
+
+    container.innerHTML = `
+      <div class="fade-in bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-violet-600 text-sm font-semibold">✨ Claude's ${mealType} suggestion</span>
+        </div>
+        <div class="text-sm text-slate-700 leading-relaxed markdown-body whitespace-pre-wrap">${formatMarkdown(data.suggestion)}</div>
+        <p class="text-xs text-slate-400 mt-3">This suggestion is for reference only. Consult your renal dietitian for personalized advice.</p>
+      </div>`;
+  } catch (err) {
+    container.innerHTML = `
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600">
+        Failed to get suggestion: ${err.message}. Make sure GROQ_API_KEY is set.
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Suggest Meal`;
+  }
+}
+
+function formatMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^- (.+)$/gm, "<li>$1</li>")
+    .replace(/((<li>.*<\/li>\n?)+)/g, "<ul>$1</ul>")
+    .replace(/\n\n/g, "<br/><br/>")
+    .replace(/\n/g, "<br/>");
+}
+
+// ── Log actions ───────────────────────────────────────────────
+function removeItem(id) {
+  state.log = state.log.filter(i => i.id !== id);
+  renderAll();
+}
+
+function clearLog() {
+  if (!state.log.length) return;
+  if (confirm("Clear all logged foods?")) {
+    state.log = [];
+    renderAll();
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+function renderAll() {
+  renderNutrientCards();
+  renderLog();
+}
+
+function initDate() {
+  const now = new Date();
+  document.getElementById("date-display").textContent =
+    now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+}
+
+// Keyboard support for search
+document.addEventListener("DOMContentLoaded", () => {
+  initDate();
+  renderQuickAdd();
+  renderAll();
+
+  document.getElementById("search-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") searchFoods();
+  });
+
+  document.getElementById("serving-input").addEventListener("input", updateServingPreview);
+  document.getElementById("serving-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") confirmAdd();
+  });
+
+  // Close modal on backdrop click
+  document.getElementById("serving-modal").addEventListener("click", e => {
+    if (e.target === document.getElementById("serving-modal")) closeModal();
+  });
+});
+</script>
+</body>
+</html>
