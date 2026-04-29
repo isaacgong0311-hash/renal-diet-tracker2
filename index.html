@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-font="md">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="RenalGuide — Track daily potassium, phosphorus, sodium, and fluid intake for dialysis patients"/>
   <title>RenalGuide — Dialysis Diet Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -14,6 +15,7 @@
       --text:    #1e1b4b;
       --muted:   #6b7280;
       --accent:  #6366f1;
+      --fs:      1rem;
     }
     [data-theme="dark"] {
       --bg:      #0f0e1a;
@@ -23,15 +25,30 @@
       --muted:   #9ca3af;
       --accent:  #818cf8;
     }
+    [data-font="lg"] { font-size: 1.0625rem; }
+    [data-font="xl"] { font-size: 1.125rem; }
+
     * { box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
+      font-size: var(--fs, 1rem);
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       transition: background 0.4s, color 0.4s;
       overflow-x: hidden;
     }
+
+    /* Skip navigation link for keyboard users */
+    .skip-link {
+      position: absolute; left: -9999px; top: .5rem; z-index: 200;
+      background: var(--accent); color: #fff; padding: .5rem 1rem;
+      border-radius: .6rem; font-weight: 700; text-decoration: none;
+    }
+    .skip-link:focus { left: .75rem; }
+
+    /* Focus visible for keyboard navigation */
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
     /* animated mesh background */
     body::before {
@@ -73,6 +90,15 @@
     @keyframes pulseWarn   { 0%,100%{opacity:1} 50%{opacity:.7} }
     @keyframes pulseDanger { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 70%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
 
+    /* status badge (text + icon alongside bar — for color-blind users) */
+    .status-badge {
+      display:inline-flex; align-items:center; gap:.2rem;
+      padding:.12rem .45rem; border-radius:.4rem; font-size:.68rem; font-weight:700; letter-spacing:.02em;
+    }
+    .status-safe   { background:rgba(52,211,153,.15);  color:#059669; }
+    .status-warn   { background:rgba(251,191,36,.15);  color:#b45309; }
+    .status-danger { background:rgba(248,113,113,.15); color:#b91c1c; }
+
     /* buttons */
     .btn {
       display:inline-flex; align-items:center; gap:0.4rem;
@@ -88,6 +114,7 @@
     .btn-violet  { background:linear-gradient(135deg,#8b5cf6,#ec4899); color:#fff; box-shadow:0 4px 15px rgba(139,92,246,0.35); }
     .btn-emerald { background:linear-gradient(135deg,#10b981,#06b6d4); color:#fff; box-shadow:0 4px 15px rgba(16,185,129,0.3); }
     .btn-ghost   { background:var(--surface); color:var(--text); border:1px solid var(--border); }
+    .btn-icon    { background:var(--surface); color:var(--muted); border:1px solid var(--border); padding:.4rem .6rem; font-size:.8rem; border-radius:.6rem; }
     .btn:disabled { opacity:.55; cursor:not-allowed; }
 
     /* inputs */
@@ -140,18 +167,92 @@
 
     /* nutrient badge */
     .nbadge { display:inline-block; padding:.1rem .45rem; border-radius:.4rem; font-size:.72rem; font-weight:600; }
+
+    /* tooltip */
+    .tooltip-wrap { position:relative; display:inline-flex; align-items:center; }
+    .tooltip-btn  { background:none; border:none; cursor:pointer; color:var(--muted); font-size:.8rem; padding:.1rem .25rem; line-height:1; border-radius:.3rem; transition:color .2s; }
+    .tooltip-btn:hover, .tooltip-btn:focus { color:var(--accent); }
+    .tooltip-content {
+      position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+      background:rgba(15,14,26,.96); color:#e0e0ff;
+      padding:.55rem .8rem; border-radius:.65rem; font-size:.73rem; line-height:1.5;
+      width:200px; text-align:left; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:200;
+      opacity:0; pointer-events:none; transition:opacity .18s; white-space:normal;
+    }
+    .tooltip-wrap:hover .tooltip-content,
+    .tooltip-btn:focus + .tooltip-content { opacity:1; pointer-events:auto; }
+
+    /* date nav */
+    .date-nav { display:flex; align-items:center; gap:.5rem; }
+    .date-nav-btn {
+      background:var(--surface); border:1px solid var(--border); color:var(--text);
+      border-radius:.5rem; padding:.2rem .55rem; cursor:pointer; font-size:.8rem;
+      transition:all .2s; font-weight:600;
+    }
+    .date-nav-btn:hover:not(:disabled) { background:rgba(99,102,241,.1); border-color:var(--accent); }
+    .date-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+    /* past-day banner */
+    #past-banner {
+      display:none; background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.3);
+      border-radius:.9rem; padding:.7rem 1.1rem; font-size:.82rem; color:#b45309;
+      font-weight:600; align-items:center; gap:.5rem;
+    }
+    #past-banner.visible { display:flex; }
+
+    /* fluid cups */
+    .cup { display:inline-block; font-size:1rem; transition:opacity .3s, filter .3s; opacity:.18; filter:grayscale(1); }
+    .cup.filled { opacity:1; filter:none; }
+    .cup.partial { opacity:.6; filter:grayscale(.4); }
+
+    /* recent foods highlight */
+    .recent-pill {
+      display:inline-block; background:rgba(99,102,241,.1); color:var(--accent);
+      border-radius:.4rem; padding:.08rem .4rem; font-size:.65rem; font-weight:700;
+    }
+
+    /* font size controls */
+    .fs-btn {
+      background:var(--surface); border:1px solid var(--border); color:var(--muted);
+      border-radius:.45rem; cursor:pointer; padding:.2rem .5rem; font-weight:700;
+      transition:all .2s; line-height:1;
+    }
+    .fs-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(99,102,241,.08); }
+    .fs-btn:hover:not(.active) { border-color:var(--accent); }
+
+    /* section labels row */
+    .section-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.5rem; margin-bottom:.75rem; }
+
+    /* print styles */
+    @media print {
+      .no-print, header nav, #toast-container, .btn, aside,
+      .skip-link, #past-banner, .date-nav, .tooltip-btn { display:none !important; }
+      body::before { display:none; }
+      .glass { box-shadow:none !important; backdrop-filter:none !important; border:1px solid #ccc !important; background:#fff !important; }
+      body { background:#fff !important; color:#000 !important; }
+      main { padding:0 !important; }
+      #food-log-container table { border-collapse:collapse; width:100%; }
+      #food-log-container td, #food-log-container th { border:1px solid #ddd; padding:4px 8px; font-size:11px; }
+    }
   </style>
 </head>
 <body>
 
-<div id="toast-container"></div>
+<!-- Skip to main content (accessibility) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Live region for screen reader announcements -->
+<div id="sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"
+     style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"></div>
+
+<div id="toast-container" role="status" aria-live="polite" aria-label="Notifications"></div>
 
 <!-- Header -->
-<header class="sticky top-0 z-30 px-6 py-3" style="background:var(--surface);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);">
+<header role="banner" class="sticky top-0 z-30 px-6 py-3 no-print" style="background:var(--surface);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);">
   <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
     <div class="flex items-center gap-3 shrink-0">
-      <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:.9rem;padding:.45rem;box-shadow:0 4px 15px rgba(99,102,241,.4)">
-        <svg class="w-6 h-6" fill="white" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+      <div aria-hidden="true" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:.9rem;padding:.45rem;box-shadow:0 4px 15px rgba(99,102,241,.4)">
+        <svg class="w-6 h-6" fill="white" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
       </div>
       <div>
         <h1 class="text-xl font-extrabold grad-text leading-tight">RenalGuide</h1>
@@ -159,53 +260,120 @@
       </div>
     </div>
     <div class="flex items-center gap-3 flex-wrap justify-end">
-      <input id="patient-name" class="inp" type="text" placeholder="Your name…" maxlength="24" style="width:130px;padding:.35rem .75rem;font-size:.8rem"/>
-      <p class="text-sm font-semibold hidden md:block" style="color:var(--text)" id="date-display"></p>
-      <div class="flex items-center gap-1.5">
-        <span style="font-size:.8rem">🌙</span>
-        <div class="toggle-track" onclick="toggleDark()"><div class="toggle-thumb"></div></div>
+      <label for="patient-name" class="sr-only" style="position:absolute;left:-9999px">Your name</label>
+      <input id="patient-name" class="inp" type="text" placeholder="Your name…" maxlength="24" aria-label="Patient name" style="width:130px;padding:.35rem .75rem;font-size:.8rem"/>
+      <p class="text-sm font-semibold hidden md:block" style="color:var(--text)" id="date-display" aria-live="polite"></p>
+
+      <!-- Font size controls -->
+      <div class="flex items-center gap-1" role="group" aria-label="Text size">
+        <button class="fs-btn active" id="fs-md" onclick="setFontSize('md')" aria-pressed="true" title="Normal text size">A</button>
+        <button class="fs-btn" id="fs-lg" onclick="setFontSize('lg')" aria-pressed="false" title="Large text size">A+</button>
+        <button class="fs-btn" id="fs-xl" onclick="setFontSize('xl')" aria-pressed="false" title="Extra large text size">A++</button>
+      </div>
+
+      <!-- Print button -->
+      <button class="btn btn-ghost text-xs py-1 px-3" onclick="printLog()" aria-label="Print today's food log" title="Print log">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z"/></svg>
+        Print
+      </button>
+
+      <!-- Dark mode toggle -->
+      <div class="flex items-center gap-1.5" role="group" aria-label="Color theme">
+        <span aria-hidden="true" style="font-size:.8rem">🌙</span>
+        <div class="toggle-track" role="switch" aria-checked="false" id="theme-toggle"
+             tabindex="0" aria-label="Toggle dark mode"
+             onclick="toggleDark()" onkeydown="if(event.key==='Enter'||event.key===' ')toggleDark()">
+          <div class="toggle-thumb"></div>
+        </div>
       </div>
     </div>
   </div>
 </header>
 
 <!-- Main -->
-<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+<main id="main-content" class="max-w-7xl mx-auto px-4 py-6 space-y-6" role="main">
 
   <!-- Nutrient Dashboard -->
-  <section>
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)">Daily Limits</h2>
-      <button class="btn btn-ghost text-xs py-1 px-3" onclick="openLimitsModal()">⚙ Customize</button>
+  <section aria-labelledby="dashboard-heading">
+    <div class="section-toolbar">
+      <h2 id="dashboard-heading" class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)">Daily Limits</h2>
+      <div class="flex items-center gap-2">
+        <!-- Date navigation -->
+        <nav class="date-nav no-print" aria-label="Browse day history">
+          <button class="date-nav-btn" id="btn-prev-day" onclick="navigateDay(-1)" aria-label="Previous day">‹</button>
+          <button class="date-nav-btn" id="btn-today" onclick="navigateDay(0)" aria-label="Go to today">Today</button>
+          <button class="date-nav-btn" id="btn-next-day" onclick="navigateDay(1)" aria-label="Next day" disabled>›</button>
+        </nav>
+        <button class="btn btn-ghost text-xs py-1 px-3 no-print" onclick="openLimitsModal()" aria-label="Customize daily nutrient limits">⚙ Customize</button>
+      </div>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="nutrient-cards"></div>
+
+    <!-- Past day banner -->
+    <div id="past-banner" role="status" aria-live="polite">
+      <span aria-hidden="true">📅</span>
+      <span id="past-banner-text">Viewing a past day — log is read-only</span>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-3" id="nutrient-cards" role="list" aria-label="Nutrient intake summary"></div>
+  </section>
+
+  <!-- Fluid visual tracker -->
+  <section class="glass p-4" aria-labelledby="fluid-heading">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center gap-2">
+        <h2 id="fluid-heading" class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)">Fluid Tracker</h2>
+        <div class="tooltip-wrap">
+          <button class="tooltip-btn" aria-label="About fluid limits for dialysis patients" tabindex="0">ℹ</button>
+          <div class="tooltip-content" role="tooltip">
+            Dialysis patients cannot excrete excess fluid. Fluid between sessions causes swelling, high blood pressure, and can strain the heart. Includes all beverages and water content in food.
+          </div>
+        </div>
+      </div>
+      <span id="fluid-label" class="text-xs font-semibold" style="color:var(--muted)"></span>
+    </div>
+    <div id="fluid-cups" class="flex flex-wrap gap-1.5 mt-3" aria-label="Fluid intake visualized as cups" role="img"></div>
   </section>
 
   <!-- Two columns -->
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
     <!-- LEFT sidebar -->
-    <aside class="lg:col-span-2 space-y-4">
+    <aside class="lg:col-span-2 space-y-4" aria-label="Food search and quick add">
 
+      <!-- Search -->
       <div class="glass p-5">
         <h2 class="font-bold mb-3 flex items-center gap-2" style="color:var(--text)">
-          <span class="grad-text">🔍</span> Search Foods
+          <span aria-hidden="true" class="grad-text">🔍</span> Search Foods
         </h2>
         <div class="flex gap-2">
-          <input id="search-input" class="inp flex-1" type="text" placeholder="e.g. chicken breast, rice…"/>
-          <button class="btn btn-primary" onclick="searchFoods()">Go</button>
+          <label for="search-input" class="sr-only" style="position:absolute;left:-9999px">Search food database</label>
+          <input id="search-input" class="inp flex-1" type="search" placeholder="e.g. chicken breast, rice…"
+                 aria-label="Search USDA food database" autocomplete="off"/>
+          <button class="btn btn-primary" onclick="searchFoods()" aria-label="Search for food">Go</button>
         </div>
         <p class="text-xs mt-1.5" style="color:var(--muted)">USDA FoodData Central</p>
-        <div id="search-results" class="mt-3 space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+        <div id="search-results" class="mt-3 space-y-2 max-h-72 overflow-y-auto pr-1" aria-live="polite" aria-label="Search results"></div>
       </div>
 
+      <!-- Recent foods -->
+      <div class="glass p-5" id="recent-section" style="display:none">
+        <h2 class="font-bold mb-2 flex items-center gap-2" style="color:var(--text)">
+          <span aria-hidden="true">🕐</span> Recent Foods
+        </h2>
+        <div id="recent-list" class="space-y-1 max-h-48 overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- Quick Add -->
       <div class="glass p-5">
-        <h2 class="font-bold mb-1 flex items-center gap-2" style="color:var(--text)">⚡ Quick Add</h2>
+        <h2 class="font-bold mb-1 flex items-center gap-2" style="color:var(--text)">
+          <span aria-hidden="true">⚡</span> Quick Add
+        </h2>
         <p class="text-xs mb-3" style="color:var(--muted)">Renal-friendly staples · per 100 g</p>
-        <div id="quick-add-list" class="space-y-1 max-h-72 overflow-y-auto pr-1"></div>
+        <div id="quick-add-list" class="space-y-1 max-h-72 overflow-y-auto pr-1" role="list" aria-label="Quick add renal-friendly foods"></div>
       </div>
 
-      <div class="glass p-4" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)">
+      <!-- Reminder card -->
+      <div class="glass p-4" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)" role="note" aria-label="Daily limits reminder">
         <p class="font-semibold text-sm mb-1.5" style="color:#d97706">⚠ Daily Limits Reminder</p>
         <ul class="text-xs space-y-0.5 list-disc pl-4" style="color:var(--muted)">
           <li>Potassium &lt; 2,000 mg — avoid bananas, potatoes, tomatoes</li>
@@ -219,37 +387,42 @@
     <!-- RIGHT -->
     <div class="lg:col-span-3 space-y-4">
 
+      <!-- Food log -->
       <div class="glass p-5">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
           <h2 class="font-bold flex items-center gap-2" style="color:var(--text)">
-            📋 Today's Log
-            <span id="log-count" class="text-xs font-normal px-2 py-0.5 rounded-full" style="background:rgba(99,102,241,.12);color:var(--accent)"></span>
+            <span aria-hidden="true">📋</span> Today's Log
+            <span id="log-count" class="text-xs font-normal px-2 py-0.5 rounded-full" aria-live="polite"
+                  style="background:rgba(99,102,241,.12);color:var(--accent)"></span>
           </h2>
-          <button class="btn btn-ghost text-xs py-1 px-3" onclick="clearLog()">🗑 Clear all</button>
+          <button class="btn btn-ghost text-xs py-1 px-3 no-print" id="clear-all-btn"
+                  onclick="clearLog()" aria-label="Clear all logged foods">🗑 Clear all</button>
         </div>
-        <div id="food-log-container"></div>
+        <div id="food-log-container" aria-live="polite" aria-label="Food log"></div>
       </div>
 
+      <!-- AI Meal Planner -->
       <div class="glass p-5" style="border-color:rgba(139,92,246,.25)">
         <h2 class="font-bold flex items-center gap-2 mb-1" style="color:var(--text)">
-          <span class="grad-text">✨</span> AI Meal Planner
+          <span aria-hidden="true" class="grad-text">✨</span> AI Meal Planner
         </h2>
         <p class="text-xs mb-4" style="color:var(--muted)">
           Powered by Llama 3.3 70B via Groq — suggests meals that fit your remaining allowances
         </p>
         <div class="flex gap-3 mb-4">
-          <select id="meal-type" class="inp flex-1">
+          <label for="meal-type" class="sr-only" style="position:absolute;left:-9999px">Meal type</label>
+          <select id="meal-type" class="inp flex-1" aria-label="Select meal type">
             <option value="breakfast">🌅 Breakfast</option>
             <option value="lunch">☀️ Lunch</option>
             <option value="dinner" selected>🌙 Dinner</option>
             <option value="snack">🍎 Snack</option>
           </select>
-          <button id="suggest-btn" class="btn btn-violet" onclick="getMealSuggestion()">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <button id="suggest-btn" class="btn btn-violet" onclick="getMealSuggestion()" aria-label="Get AI meal suggestion">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             Suggest Meal
           </button>
         </div>
-        <div id="ai-suggestion-container"></div>
+        <div id="ai-suggestion-container" aria-live="polite" aria-label="AI meal suggestion"></div>
       </div>
 
     </div>
@@ -257,42 +430,71 @@
 </main>
 
 <!-- Serving Modal -->
-<div id="modal-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4" style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)">
+<div id="modal-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4"
+     style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)"
+     role="dialog" aria-modal="true" aria-labelledby="modal-food-name">
   <div class="glass p-6 w-full max-w-sm fade-in">
     <h3 class="font-bold text-lg mb-0.5" style="color:var(--text)" id="modal-food-name"></h3>
     <p class="text-xs mb-4" style="color:var(--muted)" id="modal-food-details"></p>
-    <label class="block text-sm font-semibold mb-1" style="color:var(--text)">Serving size (grams)</label>
-    <input id="serving-input" class="inp mb-2" type="number" min="1" max="2000" value="100"/>
-    <p class="text-xs mb-4" style="color:var(--accent)" id="serving-preview"></p>
+    <label class="block text-sm font-semibold mb-1" style="color:var(--text)" for="serving-input">Serving size (grams)</label>
+    <input id="serving-input" class="inp mb-2" type="number" min="1" max="2000" value="100" aria-describedby="serving-preview"/>
+    <p class="text-xs mb-4" style="color:var(--accent)" id="serving-preview" role="status"></p>
     <div class="flex gap-3">
-      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary flex-1" onclick="confirmAdd()">Add to Log</button>
+      <button class="btn btn-ghost flex-1" onclick="closeModal()" aria-label="Cancel adding food">Cancel</button>
+      <button class="btn btn-primary flex-1" onclick="confirmAdd()" aria-label="Add food to log">Add to Log</button>
     </div>
   </div>
 </div>
 
 <!-- Limits Modal -->
-<div id="limits-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4" style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)">
+<div id="limits-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4"
+     style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)"
+     role="dialog" aria-modal="true" aria-labelledby="limits-modal-title">
   <div class="glass p-6 w-full max-w-sm fade-in">
-    <h3 class="font-bold text-lg mb-4" style="color:var(--text)">⚙ Customize Daily Limits</h3>
+    <h3 class="font-bold text-lg mb-4" style="color:var(--text)" id="limits-modal-title">⚙ Customize Daily Limits</h3>
     <div class="space-y-3">
-      <div><label class="text-sm font-medium block mb-1" style="color:var(--muted)">Potassium (mg)</label><input id="lim-k"  class="inp" type="number"/></div>
-      <div><label class="text-sm font-medium block mb-1" style="color:var(--muted)">Phosphorus (mg)</label><input id="lim-p"  class="inp" type="number"/></div>
-      <div><label class="text-sm font-medium block mb-1" style="color:var(--muted)">Sodium (mg)</label><input id="lim-na" class="inp" type="number"/></div>
-      <div><label class="text-sm font-medium block mb-1" style="color:var(--muted)">Fluid (mL)</label><input id="lim-fl" class="inp" type="number"/></div>
+      <div>
+        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-k">Potassium (mg)</label>
+        <input id="lim-k" class="inp" type="number" min="500" max="5000" aria-describedby="lim-k-hint"/>
+        <p id="lim-k-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 2,000 mg</p>
+      </div>
+      <div>
+        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-p">Phosphorus (mg)</label>
+        <input id="lim-p" class="inp" type="number" min="200" max="3000" aria-describedby="lim-p-hint"/>
+        <p id="lim-p-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 1,000 mg</p>
+      </div>
+      <div>
+        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-na">Sodium (mg)</label>
+        <input id="lim-na" class="inp" type="number" min="500" max="5000" aria-describedby="lim-na-hint"/>
+        <p id="lim-na-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 2,000 mg</p>
+      </div>
+      <div>
+        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-fl">Fluid (mL)</label>
+        <input id="lim-fl" class="inp" type="number" min="500" max="3000" aria-describedby="lim-fl-hint"/>
+        <p id="lim-fl-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 1,500 mL</p>
+      </div>
     </div>
     <div class="flex gap-3 mt-5">
-      <button class="btn btn-ghost flex-1" onclick="closeLimitsModal()">Cancel</button>
-      <button class="btn btn-emerald flex-1" onclick="saveLimits()">Save</button>
+      <button class="btn btn-ghost flex-1" onclick="closeLimitsModal()" aria-label="Cancel limit changes">Cancel</button>
+      <button class="btn btn-emerald flex-1" onclick="saveLimits()" aria-label="Save new daily limits">Save</button>
     </div>
   </div>
 </div>
 
 <script>
+// ─── Constants ────────────────────────────────────────────────────────────────
 const DEFAULT_LIMITS = { k:2000, p:1000, na:2000, fluid:1500 };
-let LIMITS = {...DEFAULT_LIMITS};
-let log = [], nextId = 1, pendingFood = null;
-let prevTotals = { k:0, p:0, na:0, fluid:0 };
+
+const NUTRIENT_INFO = {
+  k:     { label:'Potassium',  unit:'mg', icon:'🫘', color:'#6366f1',
+           why:'Failing kidneys cannot excrete potassium. High levels (hyperkalemia) can cause dangerous heart arrhythmias and cardiac arrest.' },
+  p:     { label:'Phosphorus', unit:'mg', icon:'🧪', color:'#8b5cf6',
+           why:'Excess phosphorus draws calcium from bones, causing weak bones and calcification of arteries and joints (renal osteodystrophy).' },
+  na:    { label:'Sodium',     unit:'mg', icon:'🧂', color:'#ec4899',
+           why:'Sodium causes thirst and fluid retention. Extra fluid between dialysis sessions raises blood pressure and strains the heart.' },
+  fluid: { label:'Fluid',      unit:'mL', icon:'💧', color:'#06b6d4',
+           why:'Excess fluid accumulates between dialysis sessions causing shortness of breath, swelling, and dangerous cardiac stress.' },
+};
 
 const QUICK_FOODS = [
   { name:"White rice, cooked",        k:29,  p:43,  na:1,   fluid:69, cal:130, protein:2.7 },
@@ -311,14 +513,116 @@ const QUICK_FOODS = [
   { name:"Olive oil (14 g / 1 tbsp)", k:0,   p:0,   na:0,   fluid:0,  cal:119, protein:0   },
 ];
 
-const totals = () => log.reduce((a,i)=>({k:a.k+i.k,p:a.p+i.p,na:a.na+i.na,fluid:a.fluid+i.fluid}),{k:0,p:0,na:0,fluid:0});
-const remaining = () => { const t=totals(); return {k:Math.max(0,LIMITS.k-t.k),p:Math.max(0,LIMITS.p-t.p),na:Math.max(0,LIMITS.na-t.na),fluid:Math.max(0,LIMITS.fluid-t.fluid)}; };
-const scale = (f,g) => { const r=g/100; return {k:+(f.k*r).toFixed(1),p:+(f.p*r).toFixed(1),na:+(f.na*r).toFixed(1),fluid:+(f.fluid*r).toFixed(1),cal:+(f.cal*r).toFixed(1),protein:+(f.protein*r).toFixed(1)}; };
-const pct = (v,l) => Math.min(100,(v/l)*100);
-const barCls = p => p>=100?'pbar-danger':p>=75?'pbar-warn':'pbar-safe';
-const fmt = (n,d=0) => Number(n).toFixed(d);
+// ─── State ────────────────────────────────────────────────────────────────────
+let LIMITS     = JSON.parse(localStorage.getItem('renalguide_limits') || 'null') || {...DEFAULT_LIMITS};
+let log        = [], nextId = 1, pendingFood = null;
+let prevTotals = { k:0, p:0, na:0, fluid:0 };
+let recentFoods = JSON.parse(localStorage.getItem('renalguide_recent') || '[]');
 
-// animated counter
+// Date tracking
+const todayStr = () => new Date().toISOString().slice(0,10);
+let viewingDate = todayStr();
+const isToday   = () => viewingDate === todayStr();
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const totals    = () => log.reduce((a,i)=>({k:a.k+i.k, p:a.p+i.p, na:a.na+i.na, fluid:a.fluid+i.fluid}),{k:0,p:0,na:0,fluid:0});
+const remaining = () => { const t=totals(); return {k:Math.max(0,LIMITS.k-t.k),p:Math.max(0,LIMITS.p-t.p),na:Math.max(0,LIMITS.na-t.na),fluid:Math.max(0,LIMITS.fluid-t.fluid)}; };
+const scale     = (f,g) => { const r=g/100; return {k:+(f.k*r).toFixed(1),p:+(f.p*r).toFixed(1),na:+(f.na*r).toFixed(1),fluid:+(f.fluid*r).toFixed(1),cal:+(f.cal*r).toFixed(1),protein:+(f.protein*r).toFixed(1)}; };
+const pct       = (v,l) => Math.min(100,(v/l)*100);
+const barCls    = p => p>=100?'pbar-danger':p>=75?'pbar-warn':'pbar-safe';
+const fmt       = (n,d=0) => Number(n).toFixed(d);
+
+function statusBadge(p) {
+  if(p>=100) return `<span class="status-badge status-danger" aria-label="Danger: limit exceeded">✕ Over limit</span>`;
+  if(p>=75)  return `<span class="status-badge status-warn"   aria-label="Warning: approaching limit">⚠ Warning</span>`;
+  return          `<span class="status-badge status-safe"   aria-label="Safe: within limit">✓ Safe</span>`;
+}
+
+// ─── Persistence ──────────────────────────────────────────────────────────────
+function saveLog() {
+  localStorage.setItem(`renalguide_log_${viewingDate}`, JSON.stringify({log, nextId}));
+}
+
+function loadLog(dateStr) {
+  const saved = localStorage.getItem(`renalguide_log_${dateStr}`);
+  if(saved) {
+    const data = JSON.parse(saved);
+    log    = data.log    || [];
+    nextId = data.nextId || log.length + 1;
+  } else {
+    log = []; nextId = 1;
+  }
+  prevTotals = {k:0,p:0,na:0,fluid:0};
+}
+
+function saveRecentFoods() {
+  localStorage.setItem('renalguide_recent', JSON.stringify(recentFoods));
+}
+
+function addToRecent(food) {
+  recentFoods = recentFoods.filter(f => f.name !== food.name);
+  recentFoods.unshift({...food});
+  if(recentFoods.length > 8) recentFoods = recentFoods.slice(0,8);
+  saveRecentFoods();
+}
+
+// ─── Date navigation ──────────────────────────────────────────────────────────
+function navigateDay(delta) {
+  if(delta === 0) {
+    viewingDate = todayStr();
+  } else {
+    const d = new Date(viewingDate);
+    d.setDate(d.getDate() + delta);
+    const newDate = d.toISOString().slice(0,10);
+    if(newDate > todayStr()) return;
+    viewingDate = newDate;
+  }
+  loadLog(viewingDate);
+  updateDateNav();
+  renderAll();
+  announce(`Showing log for ${formatDateLabel(viewingDate)}`);
+}
+
+function formatDateLabel(dateStr) {
+  if(dateStr === todayStr()) return 'Today';
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+function updateDateNav() {
+  const pastBanner = document.getElementById('past-banner');
+  const pastText   = document.getElementById('past-banner-text');
+  const nextBtn    = document.getElementById('btn-next-day');
+  const clearBtn   = document.getElementById('clear-all-btn');
+  const suggestBtn = document.getElementById('suggest-btn');
+  const isPast     = !isToday();
+
+  nextBtn.disabled  = !isPast;
+  if(clearBtn)   clearBtn.disabled   = isPast;
+  if(suggestBtn) suggestBtn.disabled = isPast;
+
+  if(isPast) {
+    pastBanner.classList.add('visible');
+    pastText.textContent = `Viewing ${formatDateLabel(viewingDate)} — log is read-only`;
+  } else {
+    pastBanner.classList.remove('visible');
+  }
+
+  // Update header date display
+  document.getElementById('date-display').textContent =
+    isToday()
+      ? new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})
+      : formatDateLabel(viewingDate);
+}
+
+// ─── Announce for screen readers ──────────────────────────────────────────────
+function announce(msg) {
+  const el = document.getElementById('sr-announce');
+  el.textContent = '';
+  setTimeout(() => { el.textContent = msg; }, 50);
+}
+
+// ─── Animated counter ─────────────────────────────────────────────────────────
 function animCounter(el, from, to, dur=600) {
   const s = performance.now();
   const step = ts => {
@@ -329,23 +633,38 @@ function animCounter(el, from, to, dur=600) {
   requestAnimationFrame(step);
 }
 
-// toast
+// ─── Toast ────────────────────────────────────────────────────────────────────
 function toast(msg, icon='✅') {
   const el = document.createElement('div');
   el.className = 'toast';
-  el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  el.setAttribute('role','status');
+  el.innerHTML = `<span aria-hidden="true">${icon}</span><span>${msg}</span>`;
   document.getElementById('toast-container').appendChild(el);
   setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),350); }, 2800);
 }
 
-// dark mode
+// ─── Dark mode ────────────────────────────────────────────────────────────────
 function toggleDark() {
   const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',t);
   localStorage.setItem('theme',t);
+  const toggle = document.getElementById('theme-toggle');
+  if(toggle) toggle.setAttribute('aria-checked', t==='dark' ? 'true' : 'false');
 }
 
-// ripple
+// ─── Font size ────────────────────────────────────────────────────────────────
+function setFontSize(size) {
+  document.documentElement.setAttribute('data-font', size);
+  localStorage.setItem('renalguide_font', size);
+  ['md','lg','xl'].forEach(s => {
+    const btn = document.getElementById('fs-'+s);
+    if(!btn) return;
+    btn.classList.toggle('active', s===size);
+    btn.setAttribute('aria-pressed', s===size ? 'true' : 'false');
+  });
+}
+
+// ─── Ripple ───────────────────────────────────────────────────────────────────
 document.addEventListener('click', e => {
   const btn = e.target.closest('.btn');
   if(!btn) return;
@@ -355,104 +674,165 @@ document.addEventListener('click', e => {
   btn.appendChild(r); setTimeout(()=>r.remove(),500);
 });
 
-// render nutrient cards
+// ─── Render nutrient cards ────────────────────────────────────────────────────
 function renderNutrientCards() {
   const t = totals();
-  const cards = [
-    {label:'Potassium', key:'k',    val:t.k,     limit:LIMITS.k,    unit:'mg', icon:'🫘'},
-    {label:'Phosphorus',key:'p',    val:t.p,     limit:LIMITS.p,    unit:'mg', icon:'🧪'},
-    {label:'Sodium',    key:'na',   val:t.na,    limit:LIMITS.na,   unit:'mg', icon:'🧂'},
-    {label:'Fluid',     key:'fluid',val:t.fluid, limit:LIMITS.fluid,unit:'mL', icon:'💧'},
-  ];
-  document.getElementById('nutrient-cards').innerHTML = cards.map(c => {
-    const p=pct(c.val,c.limit), rem=Math.max(0,c.limit-c.val);
-    return `<div class="glass p-4 fade-in">
-      <div class="flex justify-between items-start mb-2">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)">${c.icon} ${c.label}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted)">${fmt(rem)} ${c.unit} left</p>
+  const keys = ['k','p','na','fluid'];
+  document.getElementById('nutrient-cards').innerHTML = keys.map(key => {
+    const info  = NUTRIENT_INFO[key];
+    const val   = t[key], lim = LIMITS[key];
+    const p     = pct(val, lim), rem = Math.max(0, lim - val);
+    const badge = statusBadge(p);
+    return `<div class="glass p-4 fade-in" role="listitem" aria-label="${info.label}: ${fmt(val)} of ${lim} ${info.unit}">
+      <div class="flex justify-between items-start mb-1">
+        <div class="flex items-center gap-1.5">
+          <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)" aria-hidden="true">${info.icon} ${info.label}</p>
+          <div class="tooltip-wrap">
+            <button class="tooltip-btn" aria-label="About ${info.label}" tabindex="0">ℹ</button>
+            <div class="tooltip-content" role="tooltip">${info.why}</div>
+          </div>
         </div>
-        <span class="text-sm font-extrabold" id="cnt-${c.key}" style="color:var(--text)">${fmt(c.val)}</span>
+        <span class="text-sm font-extrabold" id="cnt-${key}" style="color:var(--text)" aria-hidden="true">${fmt(val)}</span>
       </div>
-      <div class="pbar-track"><div class="pbar-fill ${barCls(p)}" style="width:${p}%"></div></div>
-      <p class="text-right text-xs mt-1.5 font-medium" style="color:var(--muted)">${fmt(c.val)} / ${c.limit} ${c.unit}</p>
+      <div class="flex items-center gap-2 mb-2">
+        ${badge}
+        <span class="text-xs" style="color:var(--muted)">${fmt(rem)} ${info.unit} left</span>
+      </div>
+      <div class="pbar-track" role="progressbar" aria-valuenow="${Math.round(val)}" aria-valuemin="0" aria-valuemax="${lim}" aria-label="${info.label} progress">
+        <div class="pbar-fill ${barCls(p)}" style="width:${p}%"></div>
+      </div>
+      <p class="text-right text-xs mt-1.5 font-medium" style="color:var(--muted)" aria-hidden="true">${fmt(val)} / ${lim} ${info.unit}</p>
     </div>`;
   }).join('');
-  cards.forEach(c => {
-    const el=document.getElementById('cnt-'+c.key);
-    if(el) animCounter(el, prevTotals[c.key]||0, c.val);
+  keys.forEach(key => {
+    const el = document.getElementById('cnt-'+key);
+    if(el) animCounter(el, prevTotals[key]||0, t[key]);
   });
-  prevTotals = {k:t.k,p:t.p,na:t.na,fluid:t.fluid};
+  prevTotals = {k:t.k, p:t.p, na:t.na, fluid:t.fluid};
 }
 
-// render log
+// ─── Fluid cups visual ────────────────────────────────────────────────────────
+function renderFluidCups() {
+  const t       = totals();
+  const lim     = LIMITS.fluid;
+  const used    = Math.min(t.fluid, lim);
+  const CUP_ML  = 250;
+  const total   = Math.ceil(lim / CUP_ML);
+  const filled  = Math.floor(used / CUP_ML);
+  const partialPct = ((used % CUP_ML) / CUP_ML);
+  let cups = '';
+  for(let i = 0; i < total; i++) {
+    let cls = 'cup';
+    if(i < filled)       cls += ' filled';
+    else if(i === filled && partialPct > 0) cls += ' partial';
+    cups += `<span class="${cls}" aria-hidden="true" title="${CUP_ML} mL">🥛</span>`;
+  }
+  document.getElementById('fluid-cups').innerHTML = cups;
+  const p = pct(t.fluid, lim);
+  document.getElementById('fluid-label').textContent =
+    `${fmt(t.fluid)} / ${lim} mL (${Math.round(p)}%)`;
+}
+
+// ─── Render log ───────────────────────────────────────────────────────────────
 function renderLog() {
-  const el=document.getElementById('food-log-container');
-  const cnt=document.getElementById('log-count');
+  const el  = document.getElementById('food-log-container');
+  const cnt = document.getElementById('log-count');
+  const isPast = !isToday();
   cnt.textContent = log.length ? `${log.length} item${log.length>1?'s':''}` : '';
   if(!log.length) {
-    el.innerHTML=`<div class="text-center py-10 fade-in" style="color:var(--muted)">
-      <div class="text-5xl mb-3">🥗</div>
-      <p class="text-sm font-medium">No foods logged yet</p>
-      <p class="text-xs mt-1">Search or quick-add a food to begin</p>
+    el.innerHTML=`<div class="text-center py-10 fade-in" style="color:var(--muted)" role="status">
+      <div class="text-5xl mb-3" aria-hidden="true">🥗</div>
+      <p class="text-sm font-medium">No foods logged${isPast?' for this day':' yet'}</p>
+      ${!isPast?`<p class="text-xs mt-1">Search or quick-add a food to begin</p>`:''}
     </div>`; return;
   }
   const t=totals();
-  el.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left">
-    <thead><tr style="border-bottom:2px solid var(--border)">
-      <th class="pb-2 text-xs font-bold pr-2" style="color:var(--muted)">Food</th>
-      <th class="pb-2 text-xs font-bold pr-2" style="color:var(--muted)">g</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#6366f1">K</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#8b5cf6">P</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#ec4899">Na</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:var(--muted)">Fluid</th>
-      <th class="pb-2 text-xs font-bold text-right" style="color:var(--muted)">Cal</th>
-      <th class="pb-2 pl-2"></th>
-    </tr></thead>
-    <tbody>${log.map(item=>`<tr class="slide-in" style="border-bottom:1px solid var(--border)">
+  const removeCol = isPast ? '' : '<th class="pb-2 pl-2"></th>';
+  const rows = log.map(item => {
+    const removeBtn = isPast ? '' :
+      `<td class="py-2 pl-2"><button onclick="removeItem(${item.id})" aria-label="Remove ${item.name}" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-size:.85rem;min-width:28px;min-height:28px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button></td>`;
+    return `<tr class="slide-in" style="border-bottom:1px solid var(--border)">
       <td class="py-2 pr-2 text-sm font-medium" style="color:var(--text)">${item.name}</td>
-      <td class="py-2 pr-2 text-xs" style="color:var(--muted)">${item.serving}</td>
+      <td class="py-2 pr-2 text-xs" style="color:var(--muted)">${item.serving}g</td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(99,102,241,.12);color:#6366f1">${fmt(item.k)}</span></td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(139,92,246,.12);color:#8b5cf6">${fmt(item.p)}</span></td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(236,72,153,.12);color:#ec4899">${fmt(item.na)}</span></td>
       <td class="py-2 pr-2 text-xs text-right" style="color:var(--muted)">${fmt(item.fluid)}</td>
       <td class="py-2 text-xs text-right" style="color:var(--muted)">${fmt(item.cal)}</td>
-      <td class="py-2 pl-2"><button onclick="removeItem(${item.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-size:.85rem" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button></td>
-    </tr>`).join('')}</tbody>
+      ${removeBtn}
+    </tr>`;
+  }).join('');
+  el.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left" aria-label="Today's food log">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th class="pb-2 text-xs font-bold pr-2" style="color:var(--muted)" scope="col">Food</th>
+      <th class="pb-2 text-xs font-bold pr-2" style="color:var(--muted)" scope="col">Serving</th>
+      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#6366f1" scope="col">K (mg)</th>
+      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#8b5cf6" scope="col">P (mg)</th>
+      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#ec4899" scope="col">Na (mg)</th>
+      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:var(--muted)" scope="col">Fluid (mL)</th>
+      <th class="pb-2 text-xs font-bold text-right" style="color:var(--muted)" scope="col">Cal</th>
+      ${removeCol}
+    </tr></thead>
+    <tbody>${rows}</tbody>
     <tfoot><tr style="border-top:2px solid var(--border)">
       <td class="pt-2 text-sm font-bold" style="color:var(--text)" colspan="2">Total</td>
       <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.k>LIMITS.k?'#ef4444':'#6366f1'}">${fmt(t.k)}</td>
       <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.p>LIMITS.p?'#ef4444':'#8b5cf6'}">${fmt(t.p)}</td>
       <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.na>LIMITS.na?'#ef4444':'#ec4899'}">${fmt(t.na)}</td>
       <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.fluid>LIMITS.fluid?'#ef4444':'var(--muted)'}">${fmt(t.fluid)}</td>
-      <td class="pt-2" colspan="2"></td>
+      <td class="pt-2" colspan="${isPast?1:2}"></td>
     </tr></tfoot>
   </table></div>`;
 }
 
-// render quick add
-function renderQuickAdd() {
-  document.getElementById('quick-add-list').innerHTML = QUICK_FOODS.map((f,i)=>`
-    <div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border)">
+// ─── Recent foods ─────────────────────────────────────────────────────────────
+function renderRecentFoods() {
+  const section = document.getElementById('recent-section');
+  const el      = document.getElementById('recent-list');
+  if(!recentFoods.length || !isToday()) { section.style.display='none'; return; }
+  section.style.display='';
+  el.innerHTML = recentFoods.map((f,i) => `
+    <div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border)" role="listitem">
       <div class="flex-1 min-w-0 pr-2">
         <p class="text-sm font-medium truncate" style="color:var(--text)">${f.name}</p>
         <p class="text-xs" style="color:var(--muted)">K:${f.k} · P:${f.p} · Na:${f.na}</p>
       </div>
-      <button class="btn btn-ghost text-xs py-1 px-2.5" onclick="openModal(QUICK_FOODS[${i}])">+ Add</button>
+      <button class="btn btn-ghost text-xs py-1 px-2.5" onclick="openModal(recentFoods[${i}])"
+              aria-label="Add ${f.name} to log">+ Add</button>
     </div>`).join('');
 }
 
-// modal
-function openModal(food) {
-  pendingFood=food;
-  document.getElementById('modal-food-name').textContent=food.name;
-  document.getElementById('modal-food-details').textContent=`Per 100 g — K:${food.k} mg · P:${food.p} mg · Na:${food.na} mg · Fluid:${food.fluid} mL`;
-  document.getElementById('serving-input').value=100;
-  updateServingPreview();
-  document.getElementById('modal-backdrop').style.display='flex';
-  setTimeout(()=>document.getElementById('serving-input').focus(),50);
+// ─── Quick add ────────────────────────────────────────────────────────────────
+function renderQuickAdd() {
+  document.getElementById('quick-add-list').innerHTML = QUICK_FOODS.map((f,i)=>`
+    <div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border)" role="listitem">
+      <div class="flex-1 min-w-0 pr-2">
+        <p class="text-sm font-medium truncate" style="color:var(--text)">${f.name}</p>
+        <p class="text-xs" style="color:var(--muted)">K:${f.k} · P:${f.p} · Na:${f.na}</p>
+      </div>
+      <button class="btn btn-ghost text-xs py-1 px-2.5" onclick="openModal(QUICK_FOODS[${i}])"
+              ${!isToday()?'disabled':''}
+              aria-label="Add ${f.name} to log">+ Add</button>
+    </div>`).join('');
 }
-function closeModal() { document.getElementById('modal-backdrop').style.display='none'; pendingFood=null; }
+
+// ─── Serving modal ────────────────────────────────────────────────────────────
+function openModal(food) {
+  if(!isToday()) return;
+  pendingFood = food;
+  document.getElementById('modal-food-name').textContent    = food.name;
+  document.getElementById('modal-food-details').textContent = `Per 100 g — K:${food.k} mg · P:${food.p} mg · Na:${food.na} mg · Fluid:${food.fluid} mL`;
+  document.getElementById('serving-input').value = 100;
+  updateServingPreview();
+  const backdrop = document.getElementById('modal-backdrop');
+  backdrop.style.display = 'flex';
+  setTimeout(() => document.getElementById('serving-input').focus(), 50);
+  trapFocus(backdrop);
+}
+function closeModal() {
+  document.getElementById('modal-backdrop').style.display='none';
+  pendingFood=null;
+}
 function updateServingPreview() {
   const g=parseFloat(document.getElementById('serving-input').value)||0;
   if(!pendingFood) return;
@@ -462,62 +842,101 @@ function updateServingPreview() {
 function confirmAdd() {
   const g=parseFloat(document.getElementById('serving-input').value)||100;
   const s=scale(pendingFood,g);
-  log.push({id:nextId++,name:pendingFood.name,serving:g,...s});
-  closeModal(); renderAll();
+  log.push({id:nextId++, name:pendingFood.name, serving:g, ...s});
+  addToRecent(pendingFood);
+  closeModal();
+  saveLog();
+  renderAll();
   toast(`Added ${pendingFood.name}`,'🍽');
+  announce(`${pendingFood.name} added to log`);
 }
 
-// limits modal
+// ─── Limits modal ─────────────────────────────────────────────────────────────
 function openLimitsModal() {
-  document.getElementById('lim-k').value=LIMITS.k;
-  document.getElementById('lim-p').value=LIMITS.p;
-  document.getElementById('lim-na').value=LIMITS.na;
-  document.getElementById('lim-fl').value=LIMITS.fluid;
-  document.getElementById('limits-backdrop').style.display='flex';
+  document.getElementById('lim-k').value  = LIMITS.k;
+  document.getElementById('lim-p').value  = LIMITS.p;
+  document.getElementById('lim-na').value = LIMITS.na;
+  document.getElementById('lim-fl').value = LIMITS.fluid;
+  const backdrop = document.getElementById('limits-backdrop');
+  backdrop.style.display = 'flex';
+  setTimeout(() => document.getElementById('lim-k').focus(), 50);
+  trapFocus(backdrop);
 }
 function closeLimitsModal() { document.getElementById('limits-backdrop').style.display='none'; }
 function saveLimits() {
-  LIMITS.k    =parseInt(document.getElementById('lim-k').value) ||DEFAULT_LIMITS.k;
-  LIMITS.p    =parseInt(document.getElementById('lim-p').value) ||DEFAULT_LIMITS.p;
-  LIMITS.na   =parseInt(document.getElementById('lim-na').value)||DEFAULT_LIMITS.na;
-  LIMITS.fluid=parseInt(document.getElementById('lim-fl').value)||DEFAULT_LIMITS.fluid;
-  closeLimitsModal(); renderAll(); toast('Limits updated','⚙');
+  LIMITS.k     = parseInt(document.getElementById('lim-k').value)  || DEFAULT_LIMITS.k;
+  LIMITS.p     = parseInt(document.getElementById('lim-p').value)  || DEFAULT_LIMITS.p;
+  LIMITS.na    = parseInt(document.getElementById('lim-na').value) || DEFAULT_LIMITS.na;
+  LIMITS.fluid = parseInt(document.getElementById('lim-fl').value) || DEFAULT_LIMITS.fluid;
+  localStorage.setItem('renalguide_limits', JSON.stringify(LIMITS));
+  closeLimitsModal();
+  renderAll();
+  toast('Limits updated','⚙');
 }
 
-// search
+// ─── Focus trap (accessibility) ───────────────────────────────────────────────
+function trapFocus(container) {
+  const focusable = container.querySelectorAll('button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+  const first = focusable[0], last = focusable[focusable.length-1];
+  function onKey(e) {
+    if(e.key !== 'Tab') return;
+    if(e.shiftKey) { if(document.activeElement===first){ e.preventDefault(); last.focus(); } }
+    else           { if(document.activeElement===last) { e.preventDefault(); first.focus(); } }
+  }
+  function onEsc(e) {
+    if(e.key === 'Escape') {
+      container.removeEventListener('keydown', onKey);
+      container.removeEventListener('keydown', onEsc);
+      if(container.id==='modal-backdrop')  closeModal();
+      if(container.id==='limits-backdrop') closeLimitsModal();
+    }
+  }
+  container.addEventListener('keydown', onKey);
+  container.addEventListener('keydown', onEsc);
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
 async function searchFoods() {
+  if(!isToday()) return;
   const q=document.getElementById('search-input').value.trim();
   if(!q) return;
   const el=document.getElementById('search-results');
-  el.innerHTML=`<div class="flex items-center gap-2 text-sm py-3" style="color:var(--muted)">
-    <svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+  el.innerHTML=`<div class="flex items-center gap-2 text-sm py-3" style="color:var(--muted)" role="status">
+    <svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
     Searching USDA database…</div>`;
   try {
     const foods=await (await fetch(`/api/food-search?q=${encodeURIComponent(q)}`)).json();
     window._sr=foods;
-    if(!foods.length){el.innerHTML=`<p class="text-sm py-3" style="color:var(--muted)">No results. Try a different term.</p>`;return;}
+    if(!foods.length){
+      el.innerHTML=`<p class="text-sm py-3" style="color:var(--muted)" role="status">No results. Try a different term.</p>`;
+      announce('No search results found');
+      return;
+    }
     el.innerHTML=foods.map((f,i)=>`
-      <div class="fade-in glass p-3">
+      <div class="fade-in glass p-3" role="listitem">
         <p class="text-sm font-semibold mb-1" style="color:var(--text)">${f.description}</p>
         <p class="text-xs mb-2" style="color:var(--muted)">K:${fmt(f.potassium)} · P:${fmt(f.phosphorus)} · Na:${fmt(f.sodium)} per 100g</p>
-        <button class="btn btn-primary text-xs py-1 px-3" onclick="openModal({name:window._sr[${i}].description,k:window._sr[${i}].potassium,p:window._sr[${i}].phosphorus,na:window._sr[${i}].sodium,fluid:window._sr[${i}].water,cal:window._sr[${i}].calories,protein:window._sr[${i}].protein})">+ Add to Log</button>
+        <button class="btn btn-primary text-xs py-1 px-3"
+                aria-label="Add ${f.description} to log"
+                onclick="openModal({name:window._sr[${i}].description,k:window._sr[${i}].potassium,p:window._sr[${i}].phosphorus,na:window._sr[${i}].sodium,fluid:window._sr[${i}].water,cal:window._sr[${i}].calories,protein:window._sr[${i}].protein})">+ Add to Log</button>
       </div>`).join('');
+    announce(`${foods.length} results found`);
   } catch(e) {
-    el.innerHTML=`<p class="text-sm py-3" style="color:#ef4444">Search failed: ${e.message}</p>`;
+    el.innerHTML=`<p class="text-sm py-3" style="color:#ef4444" role="alert">Search failed: ${e.message}</p>`;
   }
 }
 
-// AI planner
+// ─── AI planner ───────────────────────────────────────────────────────────────
 async function getMealSuggestion() {
   const btn=document.getElementById('suggest-btn');
   const el=document.getElementById('ai-suggestion-container');
   const meal=document.getElementById('meal-type').value;
   const rem=remaining();
   btn.disabled=true;
-  btn.innerHTML=`<svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Thinking…`;
-  el.innerHTML=`<div class="glass p-4 fade-in" style="border-color:rgba(139,92,246,.25)">
+  btn.innerHTML=`<svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Thinking…`;
+  el.innerHTML=`<div class="glass p-4 fade-in" style="border-color:rgba(139,92,246,.25)" role="status">
     <div class="flex items-center gap-2 mb-2">
-      <svg class="w-4 h-4 spinner" style="color:var(--accent)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      <svg class="w-4 h-4 spinner" style="color:var(--accent)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
       <span class="text-sm font-medium" style="color:var(--accent)">Designing your renal-safe ${meal}…</span>
     </div>
     <div class="h-2 rounded-full overflow-hidden" style="background:rgba(99,102,241,.1)">
@@ -529,23 +948,24 @@ async function getMealSuggestion() {
     const r=await fetch('/api/meal-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({remaining:{potassium:rem.k,phosphorus:rem.p,sodium:rem.na,fluid:rem.fluid},loggedFoods:log.map(i=>i.name),mealType:meal})});
     const data=await r.json();
     if(data.error) throw new Error(data.error);
-    el.innerHTML=`<div class="fade-in glass p-5" style="border-color:rgba(139,92,246,.3);background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.06))">
+    el.innerHTML=`<div class="fade-in glass p-5" style="border-color:rgba(139,92,246,.3);background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.06))" role="region" aria-label="AI meal suggestion">
       <div class="flex items-center gap-2 mb-3">
-        <span style="font-size:1.2rem">✨</span>
+        <span aria-hidden="true" style="font-size:1.2rem">✨</span>
         <span class="text-sm font-bold grad-text">Llama's ${meal} suggestion</span>
       </div>
       <div class="text-sm leading-relaxed" style="color:var(--text)">${formatMd(data.suggestion)}</div>
       <p class="text-xs mt-4 pt-3" style="color:var(--muted);border-top:1px solid var(--border)">For reference only. Consult your renal dietitian for personalized advice.</p>
     </div>`;
     toast('Meal suggestion ready!','✨');
+    announce('Meal suggestion is ready');
   } catch(e) {
-    el.innerHTML=`<div class="glass p-4 fade-in" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06)">
+    el.innerHTML=`<div class="glass p-4 fade-in" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06)" role="alert">
       <p class="text-sm font-semibold" style="color:#ef4444">⚠ Error</p>
       <p class="text-xs mt-1" style="color:var(--muted)">${e.message}</p>
     </div>`;
   } finally {
     btn.disabled=false;
-    btn.innerHTML=`<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Suggest Meal`;
+    btn.innerHTML=`<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Suggest Meal`;
   }
 }
 
@@ -556,28 +976,115 @@ function formatMd(t) {
     .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
 }
 
+// ─── Log actions ──────────────────────────────────────────────────────────────
 function removeItem(id) {
+  if(!isToday()) return;
   const item=log.find(i=>i.id===id);
   log=log.filter(i=>i.id!==id);
+  saveLog();
   renderAll();
-  if(item) toast(`Removed ${item.name}`,'🗑');
+  if(item) { toast(`Removed ${item.name}`,'🗑'); announce(`${item.name} removed from log`); }
 }
 function clearLog() {
-  if(!log.length) return;
-  if(confirm('Clear all logged foods?')){ log=[]; renderAll(); toast('Log cleared','🗑'); }
+  if(!isToday() || !log.length) return;
+  if(confirm('Clear all logged foods for today?')) {
+    log=[]; saveLog(); renderAll(); toast('Log cleared','🗑'); announce('Food log cleared');
+  }
 }
-function renderAll() { renderNutrientCards(); renderLog(); }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  const saved=localStorage.getItem('theme');
-  if(saved) document.documentElement.setAttribute('data-theme',saved);
-  document.getElementById('date-display').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-  renderQuickAdd(); renderAll();
-  document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')searchFoods();});
-  document.getElementById('serving-input').addEventListener('input',updateServingPreview);
-  document.getElementById('serving-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAdd();});
-  document.getElementById('modal-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('modal-backdrop'))closeModal();});
-  document.getElementById('limits-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('limits-backdrop'))closeLimitsModal();});
+// ─── Print ────────────────────────────────────────────────────────────────────
+function printLog() {
+  const t   = totals();
+  const date = isToday()
+    ? new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+    : formatDateLabel(viewingDate);
+  const name = document.getElementById('patient-name').value.trim() || 'Patient';
+  const rows = log.map(item =>
+    `<tr><td>${item.name}</td><td>${item.serving}g</td><td>${fmt(item.k)}</td><td>${fmt(item.p)}</td><td>${fmt(item.na)}</td><td>${fmt(item.fluid)}</td><td>${fmt(item.cal)}</td></tr>`
+  ).join('');
+  const win = window.open('','_blank','width=700,height=800');
+  win.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
+    <title>RenalGuide — ${name} — ${date}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:2rem;color:#111;font-size:13px}
+      h1{font-size:1.4rem;margin-bottom:.25rem}
+      h2{font-size:.85rem;color:#555;margin-bottom:1.5rem;font-weight:normal}
+      table{border-collapse:collapse;width:100%;margin-bottom:1.5rem}
+      th,td{border:1px solid #ccc;padding:6px 10px;text-align:left}
+      th{background:#f0f0f0;font-weight:600}
+      tfoot td{font-weight:bold;background:#f9f9f9}
+      .limits{margin-bottom:1.5rem;font-size:.82rem;color:#444;line-height:1.7}
+      .footer{margin-top:2rem;font-size:.78rem;color:#888;border-top:1px solid #ddd;padding-top:.75rem}
+    </style></head><body>
+    <h1>RenalGuide — Daily Food Log</h1>
+    <h2>${name} &nbsp;·&nbsp; ${date}</h2>
+    <div class="limits">
+      <strong>Daily Limits:</strong>
+      K: ${LIMITS.k} mg &nbsp;|&nbsp; P: ${LIMITS.p} mg &nbsp;|&nbsp; Na: ${LIMITS.na} mg &nbsp;|&nbsp; Fluid: ${LIMITS.fluid} mL
+    </div>
+    <table>
+      <thead><tr><th>Food</th><th>Serving</th><th>K (mg)</th><th>P (mg)</th><th>Na (mg)</th><th>Fluid (mL)</th><th>Cal</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:#999">No foods logged</td></tr>'}</tbody>
+      <tfoot><tr><td colspan="2">Total</td><td>${fmt(t.k)}</td><td>${fmt(t.p)}</td><td>${fmt(t.na)}</td><td>${fmt(t.fluid)}</td><td></td></tr></tfoot>
+    </table>
+    <div class="footer">Generated by RenalGuide · For reference only · Consult your renal dietitian for personalized advice</div>
+    </body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 400);
+}
+
+// ─── Render all ───────────────────────────────────────────────────────────────
+function renderAll() {
+  renderNutrientCards();
+  renderLog();
+  renderFluidCups();
+  renderRecentFoods();
+  renderQuickAdd();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Theme
+  const savedTheme = localStorage.getItem('theme');
+  if(savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const toggle = document.getElementById('theme-toggle');
+    if(toggle) toggle.setAttribute('aria-checked', savedTheme==='dark' ? 'true' : 'false');
+  }
+
+  // Font size
+  const savedFont = localStorage.getItem('renalguide_font') || 'md';
+  setFontSize(savedFont);
+
+  // Patient name
+  const savedName = localStorage.getItem('renalguide_name');
+  if(savedName) document.getElementById('patient-name').value = savedName;
+  document.getElementById('patient-name').addEventListener('change', e => {
+    localStorage.setItem('renalguide_name', e.target.value.trim());
+  });
+
+  // Date
+  viewingDate = todayStr();
+  loadLog(viewingDate);
+  updateDateNav();
+
+  // Render
+  renderQuickAdd();
+  renderAll();
+
+  // Keyboard shortcuts
+  document.getElementById('search-input').addEventListener('keydown', e => { if(e.key==='Enter') searchFoods(); });
+  document.getElementById('serving-input').addEventListener('input',   updateServingPreview);
+  document.getElementById('serving-input').addEventListener('keydown', e => { if(e.key==='Enter') confirmAdd(); });
+
+  // Close modals on backdrop click
+  document.getElementById('modal-backdrop').addEventListener('click', e => {
+    if(e.target===document.getElementById('modal-backdrop')) closeModal();
+  });
+  document.getElementById('limits-backdrop').addEventListener('click', e => {
+    if(e.target===document.getElementById('limits-backdrop')) closeLimitsModal();
+  });
 });
 </script>
 </body>
