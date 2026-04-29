@@ -3,34 +3,36 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="RenalGuide — Track daily potassium, phosphorus, sodium, and fluid intake for dialysis patients"/>
-  <title>RenalGuide — Dialysis Diet Tracker</title>
+  <meta name="description" content="RenalGuide — Your personal kidney health companion for dialysis patients"/>
+  <title>RenalGuide — Kidney Health Companion</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:      #f0f4ff;
-      --surface: rgba(255,255,255,0.75);
-      --border:  rgba(99,102,241,0.15);
-      --text:    #1e1b4b;
+      --bg:      #f0fdf8;
+      --surface: rgba(255,255,255,0.88);
+      --border:  rgba(13,148,136,0.18);
+      --text:    #134e4a;
       --muted:   #6b7280;
-      --accent:  #6366f1;
+      --accent:  #0d9488;
+      --accent2: #f97316;
       --fs:      1rem;
     }
     [data-theme="dark"] {
-      --bg:      #0f0e1a;
-      --surface: rgba(255,255,255,0.05);
-      --border:  rgba(99,102,241,0.25);
-      --text:    #e0e0ff;
+      --bg:      #0c1f1e;
+      --surface: rgba(255,255,255,0.06);
+      --border:  rgba(45,212,191,0.18);
+      --text:    #ccfbf1;
       --muted:   #9ca3af;
-      --accent:  #818cf8;
+      --accent:  #2dd4bf;
+      --accent2: #fb923c;
     }
     [data-font="lg"] { font-size: 1.0625rem; }
     [data-font="xl"] { font-size: 1.125rem; }
 
     * { box-sizing: border-box; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Nunito', sans-serif;
       font-size: var(--fs, 1rem);
       background: var(--bg);
       color: var(--text);
@@ -39,50 +41,47 @@
       overflow-x: hidden;
     }
 
-    /* Skip navigation link for keyboard users */
     .skip-link {
       position: absolute; left: -9999px; top: .5rem; z-index: 200;
       background: var(--accent); color: #fff; padding: .5rem 1rem;
-      border-radius: .6rem; font-weight: 700; text-decoration: none;
+      border-radius: 2rem; font-weight: 700; text-decoration: none;
     }
     .skip-link:focus { left: .75rem; }
-
-    /* Focus visible for keyboard navigation */
     :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-    /* animated mesh background */
+    /* Warm animated background */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: -1;
       background:
-        radial-gradient(ellipse 80% 60% at 10% 10%,  rgba(99,102,241,0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 70% at 90% 90%,  rgba(139,92,246,0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 50% 50%,  rgba(236,72,153,0.08) 0%, transparent 70%);
-      animation: meshMove 12s ease-in-out infinite alternate;
+        radial-gradient(ellipse 80% 60% at 5%  10%,  rgba(13,148,136,0.14)  0%, transparent 60%),
+        radial-gradient(ellipse 60% 70% at 95% 85%,  rgba(52,211,153,0.12)  0%, transparent 60%),
+        radial-gradient(ellipse 55% 50% at 50% 50%,  rgba(249,115,22,0.06)  0%, transparent 70%);
+      animation: meshMove 14s ease-in-out infinite alternate;
     }
     @keyframes meshMove {
       0%   { opacity:1;   transform:scale(1)    rotate(0deg); }
-      100% { opacity:.85; transform:scale(1.08) rotate(2deg); }
+      100% { opacity:.88; transform:scale(1.06) rotate(1.5deg); }
     }
 
-    /* glass cards */
+    /* Cards */
     .glass {
       background: var(--surface);
       border: 1px solid var(--border);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 1.25rem;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 1.5rem;
       transition: transform 0.25s, box-shadow 0.25s;
     }
-    .glass:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(99,102,241,0.12); }
+    .glass:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(13,148,136,0.13); }
 
-    /* progress bars */
-    .pbar-track { height:10px; border-radius:9999px; background:rgba(99,102,241,0.1); overflow:visible; position:relative; }
+    /* Progress bars */
+    .pbar-track { height:10px; border-radius:9999px; background:rgba(13,148,136,0.1); overflow:visible; position:relative; }
     .pbar-fill  { height:100%; border-radius:9999px; transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1); position:relative; }
     .pbar-fill::after {
       content:''; position:absolute; right:-2px; top:50%; transform:translateY(-50%);
       width:14px; height:14px; border-radius:50%; background:inherit;
-      box-shadow:0 0 10px 3px currentColor; opacity:.6;
+      box-shadow:0 0 10px 3px currentColor; opacity:.55;
     }
     .pbar-safe   { background:linear-gradient(90deg,#34d399,#10b981); color:#10b981; }
     .pbar-warn   { background:linear-gradient(90deg,#fbbf24,#f59e0b); color:#f59e0b; animation:pulseWarn 1.5s ease-in-out infinite; }
@@ -90,143 +89,178 @@
     @keyframes pulseWarn   { 0%,100%{opacity:1} 50%{opacity:.7} }
     @keyframes pulseDanger { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 70%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
 
-    /* status badge (text + icon alongside bar — for color-blind users) */
-    .status-badge {
-      display:inline-flex; align-items:center; gap:.2rem;
-      padding:.12rem .45rem; border-radius:.4rem; font-size:.68rem; font-weight:700; letter-spacing:.02em;
-    }
-    .status-safe   { background:rgba(52,211,153,.15);  color:#059669; }
-    .status-warn   { background:rgba(251,191,36,.15);  color:#b45309; }
-    .status-danger { background:rgba(248,113,113,.15); color:#b91c1c; }
+    /* SVG rings */
+    .ring-wrap { position:relative; width:62px; height:62px; flex-shrink:0; }
+    .ring-svg  { width:62px; height:62px; transform:rotate(-90deg); }
+    .ring-bg   { fill:none; stroke:rgba(13,148,136,0.1); stroke-width:3.2; }
+    .ring-fill { fill:none; stroke-width:3.2; stroke-linecap:round;
+                 transition: stroke-dasharray 0.9s cubic-bezier(0.34,1.56,0.64,1), stroke 0.4s; }
+    .ring-icon { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
 
-    /* buttons */
+    /* Status badges */
+    .status-badge { display:inline-flex; align-items:center; gap:.2rem; padding:.12rem .5rem; border-radius:2rem; font-size:.67rem; font-weight:800; letter-spacing:.02em; }
+    .status-safe   { background:rgba(52,211,153,.18);  color:#047857; }
+    .status-warn   { background:rgba(251,191,36,.18);  color:#b45309; }
+    .status-danger { background:rgba(248,113,113,.18); color:#b91c1c; }
+
+    /* Buttons */
     .btn {
       display:inline-flex; align-items:center; gap:0.4rem;
-      font-weight:600; border-radius:0.75rem;
-      padding:0.55rem 1.1rem; font-size:0.875rem;
+      font-family:'Nunito',sans-serif; font-weight:700; border-radius:9999px;
+      padding:0.55rem 1.2rem; font-size:0.875rem;
       cursor:pointer; border:none; transition:all 0.2s;
       position:relative; overflow:hidden;
     }
     .btn::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.15); opacity:0; transition:opacity 0.2s; }
     .btn:hover::after { opacity:1; }
     .btn:active { transform:scale(0.97); }
-    .btn-primary { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; box-shadow:0 4px 15px rgba(99,102,241,0.35); }
-    .btn-violet  { background:linear-gradient(135deg,#8b5cf6,#ec4899); color:#fff; box-shadow:0 4px 15px rgba(139,92,246,0.35); }
-    .btn-emerald { background:linear-gradient(135deg,#10b981,#06b6d4); color:#fff; box-shadow:0 4px 15px rgba(16,185,129,0.3); }
-    .btn-ghost   { background:var(--surface); color:var(--text); border:1px solid var(--border); }
-    .btn-icon    { background:var(--surface); color:var(--muted); border:1px solid var(--border); padding:.4rem .6rem; font-size:.8rem; border-radius:.6rem; }
-    .btn:disabled { opacity:.55; cursor:not-allowed; }
+    .btn-primary { background:linear-gradient(135deg,#0d9488,#0891b2); color:#fff; box-shadow:0 4px 16px rgba(13,148,136,0.35); }
+    .btn-coral   { background:linear-gradient(135deg,#f97316,#f59e0b); color:#fff; box-shadow:0 4px 16px rgba(249,115,22,0.35); }
+    .btn-emerald { background:linear-gradient(135deg,#10b981,#06b6d4); color:#fff; box-shadow:0 4px 16px rgba(16,185,129,0.3); }
+    .btn-ghost   { background:var(--surface); color:var(--text); border:1.5px solid var(--border); }
+    .btn-ghost:hover { border-color:var(--accent); }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
 
-    /* inputs */
+    /* Inputs */
     .inp {
-      background:var(--surface); border:1px solid var(--border); color:var(--text);
-      border-radius:.75rem; padding:.55rem .9rem; font-size:.875rem;
+      background:var(--surface); border:1.5px solid var(--border); color:var(--text);
+      border-radius:9999px; padding:.55rem 1rem; font-size:.875rem; font-family:'Nunito',sans-serif;
       outline:none; transition:border-color .2s, box-shadow .2s; width:100%;
     }
-    .inp:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(99,102,241,.15); }
+    .inp:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(13,148,136,.12); }
     .inp::placeholder { color:var(--muted); }
+    select.inp { border-radius:1rem; }
 
-    /* animations */
+    /* Animations */
     .fade-in  { animation:fadeIn  .35s ease both; }
     .slide-in { animation:slideIn .35s ease both; }
-    @keyframes fadeIn  { from{opacity:0;transform:translateY(8px)}  to{opacity:1;transform:translateY(0)} }
-    @keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes fadeIn  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
     .spinner { animation:spin .9s linear infinite; }
     @keyframes spin { to{transform:rotate(360deg)} }
 
-    /* toasts */
+    /* Toasts */
     #toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
     .toast {
       display:flex; align-items:center; gap:.6rem;
-      background:var(--surface); backdrop-filter:blur(12px);
-      border:1px solid var(--border); border-radius:.9rem;
-      padding:.7rem 1rem; font-size:.85rem; font-weight:500; color:var(--text);
-      box-shadow:0 8px 30px rgba(0,0,0,.12); animation:toastIn .3s ease; min-width:220px;
+      background:var(--surface); backdrop-filter:blur(14px);
+      border:1.5px solid var(--border); border-radius:9999px;
+      padding:.65rem 1.1rem; font-size:.85rem; font-weight:700; color:var(--text);
+      box-shadow:0 8px 32px rgba(13,148,136,.15); animation:toastIn .3s ease; min-width:200px;
     }
     .toast.out { animation:toastOut .3s ease forwards; }
     @keyframes toastIn  { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
     @keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(40px)} }
 
-    /* ripple */
+    /* Ripple */
     .ripple { position:absolute; border-radius:50%; background:rgba(255,255,255,.35); transform:scale(0); animation:rippleAnim .5s ease-out; pointer-events:none; }
     @keyframes rippleAnim { to{transform:scale(4);opacity:0} }
 
-    /* gradient text */
-    .grad-text { background:linear-gradient(135deg,#6366f1,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    /* Gradient text */
+    .grad-text { background:linear-gradient(135deg,#0d9488,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .grad-text-coral { background:linear-gradient(135deg,#f97316,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
-    /* dark toggle */
-    .toggle-track { width:44px; height:24px; background:rgba(99,102,241,.25); border-radius:9999px; position:relative; cursor:pointer; transition:background .3s; }
-    [data-theme="dark"] .toggle-track { background:rgba(99,102,241,.6); }
-    .toggle-thumb { position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform .3s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+    /* Dark toggle */
+    .toggle-track { width:46px; height:26px; background:rgba(13,148,136,.25); border-radius:9999px; position:relative; cursor:pointer; transition:background .3s; }
+    [data-theme="dark"] .toggle-track { background:rgba(45,212,191,.5); }
+    .toggle-thumb { position:absolute; top:4px; left:4px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform .3s; box-shadow:0 1px 5px rgba(0,0,0,.2); }
     [data-theme="dark"] .toggle-thumb { transform:translateX(20px); }
 
-    /* scrollbar */
+    /* Scrollbar */
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:rgba(99,102,241,.3); border-radius:9999px; }
+    ::-webkit-scrollbar-thumb { background:rgba(13,148,136,.3); border-radius:9999px; }
 
-    /* nutrient badge */
-    .nbadge { display:inline-block; padding:.1rem .45rem; border-radius:.4rem; font-size:.72rem; font-weight:600; }
+    /* Nutrient badge in table */
+    .nbadge { display:inline-block; padding:.1rem .45rem; border-radius:.4rem; font-size:.72rem; font-weight:700; }
 
-    /* tooltip */
+    /* Tooltip */
     .tooltip-wrap { position:relative; display:inline-flex; align-items:center; }
     .tooltip-btn  { background:none; border:none; cursor:pointer; color:var(--muted); font-size:.8rem; padding:.1rem .25rem; line-height:1; border-radius:.3rem; transition:color .2s; }
     .tooltip-btn:hover, .tooltip-btn:focus { color:var(--accent); }
     .tooltip-content {
       position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
-      background:rgba(15,14,26,.96); color:#e0e0ff;
-      padding:.55rem .8rem; border-radius:.65rem; font-size:.73rem; line-height:1.5;
-      width:200px; text-align:left; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:200;
+      background:rgba(10,40,38,.97); color:#ccfbf1;
+      padding:.6rem .9rem; border-radius:1rem; font-size:.73rem; line-height:1.55;
+      width:210px; text-align:left; box-shadow:0 8px 28px rgba(0,0,0,.3); z-index:200;
       opacity:0; pointer-events:none; transition:opacity .18s; white-space:normal;
     }
     .tooltip-wrap:hover .tooltip-content,
     .tooltip-btn:focus + .tooltip-content { opacity:1; pointer-events:auto; }
 
-    /* date nav */
+    /* Date nav */
     .date-nav { display:flex; align-items:center; gap:.5rem; }
     .date-nav-btn {
-      background:var(--surface); border:1px solid var(--border); color:var(--text);
-      border-radius:.5rem; padding:.2rem .55rem; cursor:pointer; font-size:.8rem;
-      transition:all .2s; font-weight:600;
+      background:var(--surface); border:1.5px solid var(--border); color:var(--text);
+      border-radius:9999px; padding:.22rem .65rem; cursor:pointer; font-size:.8rem;
+      transition:all .2s; font-weight:700; font-family:'Nunito',sans-serif;
     }
-    .date-nav-btn:hover:not(:disabled) { background:rgba(99,102,241,.1); border-color:var(--accent); }
-    .date-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
+    .date-nav-btn:hover:not(:disabled) { background:rgba(13,148,136,.1); border-color:var(--accent); color:var(--accent); }
+    .date-nav-btn:disabled { opacity:.3; cursor:not-allowed; }
 
-    /* past-day banner */
+    /* Past-day banner */
     #past-banner {
-      display:none; background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.3);
-      border-radius:.9rem; padding:.7rem 1.1rem; font-size:.82rem; color:#b45309;
-      font-weight:600; align-items:center; gap:.5rem;
+      display:none; background:rgba(251,191,36,.1); border:1.5px solid rgba(251,191,36,.3);
+      border-radius:1.2rem; padding:.65rem 1.1rem; font-size:.82rem; color:#b45309;
+      font-weight:700; align-items:center; gap:.5rem;
     }
     #past-banner.visible { display:flex; }
 
-    /* fluid cups */
-    .cup { display:inline-block; font-size:1rem; transition:opacity .3s, filter .3s; opacity:.18; filter:grayscale(1); }
-    .cup.filled { opacity:1; filter:none; }
-    .cup.partial { opacity:.6; filter:grayscale(.4); }
+    /* Fluid cups */
+    .cup { display:inline-block; font-size:1.1rem; transition:opacity .3s, filter .3s; opacity:.15; filter:grayscale(1); }
+    .cup.filled  { opacity:1; filter:none; }
+    .cup.partial { opacity:.55; filter:grayscale(.3); }
 
-    /* recent foods highlight */
-    .recent-pill {
-      display:inline-block; background:rgba(99,102,241,.1); color:var(--accent);
-      border-radius:.4rem; padding:.08rem .4rem; font-size:.65rem; font-weight:700;
-    }
-
-    /* font size controls */
+    /* Font size controls */
     .fs-btn {
-      background:var(--surface); border:1px solid var(--border); color:var(--muted);
-      border-radius:.45rem; cursor:pointer; padding:.2rem .5rem; font-weight:700;
-      transition:all .2s; line-height:1;
+      background:var(--surface); border:1.5px solid var(--border); color:var(--muted);
+      border-radius:9999px; cursor:pointer; padding:.2rem .55rem; font-weight:800;
+      font-family:'Nunito',sans-serif; transition:all .2s; line-height:1; font-size:.8rem;
     }
-    .fs-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(99,102,241,.08); }
+    .fs-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(13,148,136,.08); }
     .fs-btn:hover:not(.active) { border-color:var(--accent); }
 
-    /* section labels row */
+    /* Section toolbar */
     .section-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.5rem; margin-bottom:.75rem; }
 
-    /* print styles */
+    /* Greeting section */
+    .greeting-card {
+      background:linear-gradient(135deg,rgba(13,148,136,.12),rgba(6,182,212,.08));
+      border:1.5px solid rgba(13,148,136,.2);
+      border-radius:1.75rem; padding:1.25rem 1.5rem;
+    }
+    [data-theme="dark"] .greeting-card {
+      background:linear-gradient(135deg,rgba(45,212,191,.1),rgba(6,182,212,.07));
+    }
+
+    /* Streak badge */
+    .streak-badge {
+      display:inline-flex; align-items:center; gap:.35rem;
+      background:linear-gradient(135deg,#f97316,#f59e0b);
+      color:#fff; border-radius:9999px; padding:.3rem .75rem;
+      font-size:.78rem; font-weight:800; box-shadow:0 3px 12px rgba(249,115,22,.3);
+    }
+
+    /* Weekly dots */
+    .week-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; transition:transform .2s; }
+    .week-dot:hover { transform:scale(1.4); }
+
+    /* All-safe celebration overlay */
+    .celebrate-ring { animation:celebratePulse 2s ease-in-out 3; }
+    @keyframes celebratePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+
+    /* Section header style */
+    .section-label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+
+    /* Confetti particle */
+    .confetti { position:fixed; pointer-events:none; z-index:9998; font-size:1.2rem; animation:confettiFall 2.5s ease-in forwards; }
+    @keyframes confettiFall { 0%{opacity:1;transform:translateY(0) rotate(0)} 100%{opacity:0;transform:translateY(80vh) rotate(720deg)} }
+
+    /* Print */
     @media print {
-      .no-print, header nav, #toast-container, .btn, aside,
-      .skip-link, #past-banner, .date-nav, .tooltip-btn { display:none !important; }
+      .no-print, header, #toast-container, .btn, aside,
+      .skip-link, #past-banner, .date-nav, .tooltip-btn,
+      .greeting-card, #weekly-section { display:none !important; }
       body::before { display:none; }
       .glass { box-shadow:none !important; backdrop-filter:none !important; border:1px solid #ccc !important; background:#fff !important; }
       body { background:#fff !important; color:#000 !important; }
@@ -238,48 +272,45 @@
 </head>
 <body>
 
-<!-- Skip to main content (accessibility) -->
 <a href="#main-content" class="skip-link">Skip to main content</a>
-
-<!-- Live region for screen reader announcements -->
-<div id="sr-announce" aria-live="polite" aria-atomic="true" class="sr-only"
-     style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"></div>
-
+<div id="sr-announce" aria-live="polite" aria-atomic="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"></div>
 <div id="toast-container" role="status" aria-live="polite" aria-label="Notifications"></div>
 
 <!-- Header -->
-<header role="banner" class="sticky top-0 z-30 px-6 py-3 no-print" style="background:var(--surface);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);">
+<header role="banner" class="sticky top-0 z-30 px-5 py-3 no-print" style="background:var(--surface);backdrop-filter:blur(22px);border-bottom:1.5px solid var(--border);">
   <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
     <div class="flex items-center gap-3 shrink-0">
-      <div aria-hidden="true" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:.9rem;padding:.45rem;box-shadow:0 4px 15px rgba(99,102,241,.4)">
-        <svg class="w-6 h-6" fill="white" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+      <div aria-hidden="true" style="background:linear-gradient(135deg,#0d9488,#06b6d4);border-radius:1rem;padding:.5rem;box-shadow:0 4px 16px rgba(13,148,136,.4)">
+        <svg class="w-6 h-6" fill="white" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
       </div>
       <div>
-        <h1 class="text-xl font-extrabold grad-text leading-tight">RenalGuide</h1>
-        <p class="text-xs" style="color:var(--muted)">Dialysis Diet Tracker</p>
+        <h1 class="text-xl font-black grad-text leading-tight">RenalGuide</h1>
+        <p class="text-xs font-600" style="color:var(--muted)">Kidney Health Companion</p>
       </div>
     </div>
-    <div class="flex items-center gap-3 flex-wrap justify-end">
-      <label for="patient-name" class="sr-only" style="position:absolute;left:-9999px">Your name</label>
-      <input id="patient-name" class="inp" type="text" placeholder="Your name…" maxlength="24" aria-label="Patient name" style="width:130px;padding:.35rem .75rem;font-size:.8rem"/>
-      <p class="text-sm font-semibold hidden md:block" style="color:var(--text)" id="date-display" aria-live="polite"></p>
+    <div class="flex items-center gap-2.5 flex-wrap justify-end">
+      <label for="patient-name" style="position:absolute;left:-9999px">Your name</label>
+      <input id="patient-name" class="inp" type="text" placeholder="Your name…" maxlength="24"
+             aria-label="Patient name" style="width:120px;padding:.32rem .85rem;font-size:.8rem"/>
+      <p class="text-sm font-bold hidden md:block" style="color:var(--muted)" id="date-display" aria-live="polite"></p>
+      <div id="streak-display" style="display:none"></div>
 
-      <!-- Font size controls -->
+      <!-- Font size -->
       <div class="flex items-center gap-1" role="group" aria-label="Text size">
-        <button class="fs-btn active" id="fs-md" onclick="setFontSize('md')" aria-pressed="true" title="Normal text size">A</button>
-        <button class="fs-btn" id="fs-lg" onclick="setFontSize('lg')" aria-pressed="false" title="Large text size">A+</button>
-        <button class="fs-btn" id="fs-xl" onclick="setFontSize('xl')" aria-pressed="false" title="Extra large text size">A++</button>
+        <button class="fs-btn active" id="fs-md" onclick="setFontSize('md')" aria-pressed="true" title="Normal">A</button>
+        <button class="fs-btn" id="fs-lg" onclick="setFontSize('lg')" aria-pressed="false" title="Large">A+</button>
+        <button class="fs-btn" id="fs-xl" onclick="setFontSize('xl')" aria-pressed="false" title="Extra large">A++</button>
       </div>
 
-      <!-- Print button -->
-      <button class="btn btn-ghost text-xs py-1 px-3" onclick="printLog()" aria-label="Print today's food log" title="Print log">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z"/></svg>
+      <!-- Print -->
+      <button class="btn btn-ghost text-xs py-1.5 px-3.5" onclick="printLog()" aria-label="Print today's food log">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z"/></svg>
         Print
       </button>
 
-      <!-- Dark mode toggle -->
+      <!-- Dark mode -->
       <div class="flex items-center gap-1.5" role="group" aria-label="Color theme">
-        <span aria-hidden="true" style="font-size:.8rem">🌙</span>
+        <span aria-hidden="true" style="font-size:.85rem">🌙</span>
         <div class="toggle-track" role="switch" aria-checked="false" id="theme-toggle"
              tabindex="0" aria-label="Toggle dark mode"
              onclick="toggleDark()" onkeydown="if(event.key==='Enter'||event.key===' ')toggleDark()">
@@ -291,95 +322,103 @@
 </header>
 
 <!-- Main -->
-<main id="main-content" class="max-w-7xl mx-auto px-4 py-6 space-y-6" role="main">
+<main id="main-content" class="max-w-7xl mx-auto px-4 py-6 space-y-5" role="main">
+
+  <!-- Greeting + streak -->
+  <div class="greeting-card fade-in" id="greeting-section">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <p id="greeting-text" class="text-xl font-black" style="color:var(--text)">Welcome back! 👋</p>
+        <p id="greeting-sub" class="text-sm font-600 mt-0.5" style="color:var(--muted)">Track your nutrients and stay healthy today.</p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <div id="weekly-dots" class="flex items-center gap-1.5" aria-label="Last 7 days compliance" title="Last 7 days — green = all limits met"></div>
+        <div id="all-safe-badge" style="display:none">
+          <span class="streak-badge">🎉 All limits on track!</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Nutrient Dashboard -->
   <section aria-labelledby="dashboard-heading">
     <div class="section-toolbar">
-      <h2 id="dashboard-heading" class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)">Daily Limits</h2>
-      <div class="flex items-center gap-2">
-        <!-- Date navigation -->
+      <div class="flex items-center gap-3">
+        <h2 id="dashboard-heading" class="section-label">Today's Nutrients</h2>
         <nav class="date-nav no-print" aria-label="Browse day history">
           <button class="date-nav-btn" id="btn-prev-day" onclick="navigateDay(-1)" aria-label="Previous day">‹</button>
           <button class="date-nav-btn" id="btn-today" onclick="navigateDay(0)" aria-label="Go to today">Today</button>
           <button class="date-nav-btn" id="btn-next-day" onclick="navigateDay(1)" aria-label="Next day" disabled>›</button>
         </nav>
-        <button class="btn btn-ghost text-xs py-1 px-3 no-print" onclick="openLimitsModal()" aria-label="Customize daily nutrient limits">⚙ Customize</button>
       </div>
+      <button class="btn btn-ghost text-xs py-1.5 px-3.5 no-print" onclick="openLimitsModal()" aria-label="Customize daily nutrient limits">⚙ Customize Limits</button>
     </div>
 
-    <!-- Past day banner -->
-    <div id="past-banner" role="status" aria-live="polite">
+    <div id="past-banner" role="status" aria-live="polite" class="mb-3">
       <span aria-hidden="true">📅</span>
       <span id="past-banner-text">Viewing a past day — log is read-only</span>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-3" id="nutrient-cards" role="list" aria-label="Nutrient intake summary"></div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="nutrient-cards" role="list" aria-label="Nutrient intake summary"></div>
   </section>
 
   <!-- Fluid visual tracker -->
   <section class="glass p-4" aria-labelledby="fluid-heading">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <div class="flex items-center gap-2">
-        <h2 id="fluid-heading" class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)">Fluid Tracker</h2>
+        <h2 id="fluid-heading" class="section-label">Fluid Tracker</h2>
         <div class="tooltip-wrap">
-          <button class="tooltip-btn" aria-label="About fluid limits for dialysis patients" tabindex="0">ℹ</button>
-          <div class="tooltip-content" role="tooltip">
-            Dialysis patients cannot excrete excess fluid. Fluid between sessions causes swelling, high blood pressure, and can strain the heart. Includes all beverages and water content in food.
-          </div>
+          <button class="tooltip-btn" aria-label="About fluid limits" tabindex="0">ℹ</button>
+          <div class="tooltip-content" role="tooltip">Dialysis patients cannot excrete excess fluid. Fluid between sessions causes swelling, high blood pressure, and can strain the heart. Includes all beverages and water content in food.</div>
         </div>
       </div>
-      <span id="fluid-label" class="text-xs font-semibold" style="color:var(--muted)"></span>
+      <span id="fluid-label" class="text-xs font-bold" style="color:var(--muted)"></span>
     </div>
-    <div id="fluid-cups" class="flex flex-wrap gap-1.5 mt-3" aria-label="Fluid intake visualized as cups" role="img"></div>
+    <div id="fluid-cups" class="flex flex-wrap gap-2 mt-3" aria-label="Fluid intake visualized as cups" role="img"></div>
   </section>
 
   <!-- Two columns -->
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-    <!-- LEFT sidebar -->
+    <!-- LEFT -->
     <aside class="lg:col-span-2 space-y-4" aria-label="Food search and quick add">
 
-      <!-- Search -->
       <div class="glass p-5">
-        <h2 class="font-bold mb-3 flex items-center gap-2" style="color:var(--text)">
-          <span aria-hidden="true" class="grad-text">🔍</span> Search Foods
+        <h2 class="font-black mb-3 flex items-center gap-2 text-base" style="color:var(--text)">
+          <span aria-hidden="true">🔍</span> Find a Food
         </h2>
         <div class="flex gap-2">
-          <label for="search-input" class="sr-only" style="position:absolute;left:-9999px">Search food database</label>
-          <input id="search-input" class="inp flex-1" type="search" placeholder="e.g. chicken breast, rice…"
+          <label for="search-input" style="position:absolute;left:-9999px">Search food</label>
+          <input id="search-input" class="inp flex-1" type="search" placeholder="e.g. chicken, rice, apple…"
                  aria-label="Search USDA food database" autocomplete="off"/>
-          <button class="btn btn-primary" onclick="searchFoods()" aria-label="Search for food">Go</button>
+          <button class="btn btn-primary px-4" onclick="searchFoods()" aria-label="Search">Go</button>
         </div>
-        <p class="text-xs mt-1.5" style="color:var(--muted)">USDA FoodData Central</p>
+        <p class="text-xs mt-1.5 font-600" style="color:var(--muted)">Powered by USDA FoodData Central</p>
         <div id="search-results" class="mt-3 space-y-2 max-h-72 overflow-y-auto pr-1" aria-live="polite" aria-label="Search results"></div>
       </div>
 
-      <!-- Recent foods -->
       <div class="glass p-5" id="recent-section" style="display:none">
-        <h2 class="font-bold mb-2 flex items-center gap-2" style="color:var(--text)">
-          <span aria-hidden="true">🕐</span> Recent Foods
+        <h2 class="font-black mb-2 flex items-center gap-2 text-base" style="color:var(--text)">
+          <span aria-hidden="true">🕐</span> Recently Added
         </h2>
         <div id="recent-list" class="space-y-1 max-h-48 overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- Quick Add -->
       <div class="glass p-5">
-        <h2 class="font-bold mb-1 flex items-center gap-2" style="color:var(--text)">
+        <h2 class="font-black mb-1 flex items-center gap-2 text-base" style="color:var(--text)">
           <span aria-hidden="true">⚡</span> Quick Add
         </h2>
-        <p class="text-xs mb-3" style="color:var(--muted)">Renal-friendly staples · per 100 g</p>
-        <div id="quick-add-list" class="space-y-1 max-h-72 overflow-y-auto pr-1" role="list" aria-label="Quick add renal-friendly foods"></div>
+        <p class="text-xs mb-3 font-600" style="color:var(--muted)">Kidney-friendly staples · per 100 g</p>
+        <div id="quick-add-list" class="space-y-1 max-h-72 overflow-y-auto pr-1" role="list" aria-label="Quick add foods"></div>
       </div>
 
-      <!-- Reminder card -->
-      <div class="glass p-4" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)" role="note" aria-label="Daily limits reminder">
-        <p class="font-semibold text-sm mb-1.5" style="color:#d97706">⚠ Daily Limits Reminder</p>
-        <ul class="text-xs space-y-0.5 list-disc pl-4" style="color:var(--muted)">
-          <li>Potassium &lt; 2,000 mg — avoid bananas, potatoes, tomatoes</li>
-          <li>Phosphorus &lt; 1,000 mg — avoid dairy, nuts, dark colas</li>
-          <li>Sodium &lt; 2,000 mg — use herbs instead of salt</li>
-          <li>Fluid &lt; 1,500 mL — all beverages + food moisture</li>
+      <div class="glass p-4" style="border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.07)" role="note" aria-label="Daily limits reminder">
+        <p class="font-black text-sm mb-2" style="color:#d97706">💡 Keep in mind</p>
+        <ul class="text-xs space-y-1 font-600" style="color:var(--muted)">
+          <li>🫘 Potassium &lt; 2,000 mg — skip bananas, potatoes, tomatoes</li>
+          <li>🧪 Phosphorus &lt; 1,000 mg — limit dairy, nuts, dark colas</li>
+          <li>🧂 Sodium &lt; 2,000 mg — season with herbs, not salt</li>
+          <li>💧 Fluid &lt; 1,500 mL — counts all drinks + food water</li>
         </ul>
       </div>
     </aside>
@@ -387,38 +426,36 @@
     <!-- RIGHT -->
     <div class="lg:col-span-3 space-y-4">
 
-      <!-- Food log -->
       <div class="glass p-5">
         <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h2 class="font-bold flex items-center gap-2" style="color:var(--text)">
-            <span aria-hidden="true">📋</span> Today's Log
-            <span id="log-count" class="text-xs font-normal px-2 py-0.5 rounded-full" aria-live="polite"
-                  style="background:rgba(99,102,241,.12);color:var(--accent)"></span>
+          <h2 class="font-black flex items-center gap-2 text-base" style="color:var(--text)">
+            📋 Today's Food Log
+            <span id="log-count" class="text-xs font-bold px-2.5 py-0.5 rounded-full" aria-live="polite"
+                  style="background:rgba(13,148,136,.12);color:var(--accent)"></span>
           </h2>
-          <button class="btn btn-ghost text-xs py-1 px-3 no-print" id="clear-all-btn"
+          <button class="btn btn-ghost text-xs py-1.5 px-3.5 no-print" id="clear-all-btn"
                   onclick="clearLog()" aria-label="Clear all logged foods">🗑 Clear all</button>
         </div>
         <div id="food-log-container" aria-live="polite" aria-label="Food log"></div>
       </div>
 
-      <!-- AI Meal Planner -->
-      <div class="glass p-5" style="border-color:rgba(139,92,246,.25)">
-        <h2 class="font-bold flex items-center gap-2 mb-1" style="color:var(--text)">
-          <span aria-hidden="true" class="grad-text">✨</span> AI Meal Planner
+      <div class="glass p-5" style="border-color:rgba(249,115,22,.25)">
+        <h2 class="font-black flex items-center gap-2 mb-1 text-base" style="color:var(--text)">
+          <span aria-hidden="true">✨</span> AI Meal Planner
         </h2>
-        <p class="text-xs mb-4" style="color:var(--muted)">
-          Powered by Llama 3.3 70B via Groq — suggests meals that fit your remaining allowances
+        <p class="text-xs mb-4 font-600" style="color:var(--muted)">
+          Powered by Llama 3.3 70B — personalized meals that fit your remaining allowances
         </p>
         <div class="flex gap-3 mb-4">
-          <label for="meal-type" class="sr-only" style="position:absolute;left:-9999px">Meal type</label>
+          <label for="meal-type" style="position:absolute;left:-9999px">Meal type</label>
           <select id="meal-type" class="inp flex-1" aria-label="Select meal type">
             <option value="breakfast">🌅 Breakfast</option>
             <option value="lunch">☀️ Lunch</option>
             <option value="dinner" selected>🌙 Dinner</option>
             <option value="snack">🍎 Snack</option>
           </select>
-          <button id="suggest-btn" class="btn btn-violet" onclick="getMealSuggestion()" aria-label="Get AI meal suggestion">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <button id="suggest-btn" class="btn btn-coral" onclick="getMealSuggestion()" aria-label="Get AI meal suggestion">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             Suggest Meal
           </button>
         </div>
@@ -431,52 +468,53 @@
 
 <!-- Serving Modal -->
 <div id="modal-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4"
-     style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)"
+     style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(5px)"
      role="dialog" aria-modal="true" aria-labelledby="modal-food-name">
   <div class="glass p-6 w-full max-w-sm fade-in">
-    <h3 class="font-bold text-lg mb-0.5" style="color:var(--text)" id="modal-food-name"></h3>
-    <p class="text-xs mb-4" style="color:var(--muted)" id="modal-food-details"></p>
-    <label class="block text-sm font-semibold mb-1" style="color:var(--text)" for="serving-input">Serving size (grams)</label>
+    <h3 class="font-black text-lg mb-0.5" style="color:var(--text)" id="modal-food-name"></h3>
+    <p class="text-xs mb-4 font-600" style="color:var(--muted)" id="modal-food-details"></p>
+    <label class="block text-sm font-bold mb-1.5" style="color:var(--text)" for="serving-input">Serving size (grams)</label>
     <input id="serving-input" class="inp mb-2" type="number" min="1" max="2000" value="100" aria-describedby="serving-preview"/>
-    <p class="text-xs mb-4" style="color:var(--accent)" id="serving-preview" role="status"></p>
+    <p class="text-xs mb-4 font-700" style="color:var(--accent)" id="serving-preview" role="status"></p>
     <div class="flex gap-3">
-      <button class="btn btn-ghost flex-1" onclick="closeModal()" aria-label="Cancel adding food">Cancel</button>
-      <button class="btn btn-primary flex-1" onclick="confirmAdd()" aria-label="Add food to log">Add to Log</button>
+      <button class="btn btn-ghost flex-1" onclick="closeModal()" aria-label="Cancel">Cancel</button>
+      <button class="btn btn-primary flex-1" onclick="confirmAdd()" aria-label="Add to log">Add to Log ✓</button>
     </div>
   </div>
 </div>
 
 <!-- Limits Modal -->
 <div id="limits-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4"
-     style="display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)"
+     style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(5px)"
      role="dialog" aria-modal="true" aria-labelledby="limits-modal-title">
   <div class="glass p-6 w-full max-w-sm fade-in">
-    <h3 class="font-bold text-lg mb-4" style="color:var(--text)" id="limits-modal-title">⚙ Customize Daily Limits</h3>
+    <h3 class="font-black text-lg mb-1" style="color:var(--text)" id="limits-modal-title">⚙ Your Daily Limits</h3>
+    <p class="text-xs mb-4 font-600" style="color:var(--muted)">Set these with your renal dietitian</p>
     <div class="space-y-3">
       <div>
-        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-k">Potassium (mg)</label>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lim-k">🫘 Potassium (mg)</label>
         <input id="lim-k" class="inp" type="number" min="500" max="5000" aria-describedby="lim-k-hint"/>
-        <p id="lim-k-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 2,000 mg</p>
+        <p id="lim-k-hint" class="text-xs mt-0.5 font-600" style="color:var(--muted)">Standard dialysis limit: 2,000 mg</p>
       </div>
       <div>
-        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-p">Phosphorus (mg)</label>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lim-p">🧪 Phosphorus (mg)</label>
         <input id="lim-p" class="inp" type="number" min="200" max="3000" aria-describedby="lim-p-hint"/>
-        <p id="lim-p-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 1,000 mg</p>
+        <p id="lim-p-hint" class="text-xs mt-0.5 font-600" style="color:var(--muted)">Standard dialysis limit: 1,000 mg</p>
       </div>
       <div>
-        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-na">Sodium (mg)</label>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lim-na">🧂 Sodium (mg)</label>
         <input id="lim-na" class="inp" type="number" min="500" max="5000" aria-describedby="lim-na-hint"/>
-        <p id="lim-na-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 2,000 mg</p>
+        <p id="lim-na-hint" class="text-xs mt-0.5 font-600" style="color:var(--muted)">Standard dialysis limit: 2,000 mg</p>
       </div>
       <div>
-        <label class="text-sm font-medium block mb-1" style="color:var(--muted)" for="lim-fl">Fluid (mL)</label>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lim-fl">💧 Fluid (mL)</label>
         <input id="lim-fl" class="inp" type="number" min="500" max="3000" aria-describedby="lim-fl-hint"/>
-        <p id="lim-fl-hint" class="text-xs mt-0.5" style="color:var(--muted)">Standard: 1,500 mL</p>
+        <p id="lim-fl-hint" class="text-xs mt-0.5 font-600" style="color:var(--muted)">Standard dialysis limit: 1,500 mL</p>
       </div>
     </div>
     <div class="flex gap-3 mt-5">
-      <button class="btn btn-ghost flex-1" onclick="closeLimitsModal()" aria-label="Cancel limit changes">Cancel</button>
-      <button class="btn btn-emerald flex-1" onclick="saveLimits()" aria-label="Save new daily limits">Save</button>
+      <button class="btn btn-ghost flex-1" onclick="closeLimitsModal()">Cancel</button>
+      <button class="btn btn-emerald flex-1" onclick="saveLimits()">Save Limits ✓</button>
     </div>
   </div>
 </div>
@@ -486,14 +524,14 @@
 const DEFAULT_LIMITS = { k:2000, p:1000, na:2000, fluid:1500 };
 
 const NUTRIENT_INFO = {
-  k:     { label:'Potassium',  unit:'mg', icon:'🫘', color:'#6366f1',
-           why:'Failing kidneys cannot excrete potassium. High levels (hyperkalemia) can cause dangerous heart arrhythmias and cardiac arrest.' },
-  p:     { label:'Phosphorus', unit:'mg', icon:'🧪', color:'#8b5cf6',
-           why:'Excess phosphorus draws calcium from bones, causing weak bones and calcification of arteries and joints (renal osteodystrophy).' },
-  na:    { label:'Sodium',     unit:'mg', icon:'🧂', color:'#ec4899',
-           why:'Sodium causes thirst and fluid retention. Extra fluid between dialysis sessions raises blood pressure and strains the heart.' },
-  fluid: { label:'Fluid',      unit:'mL', icon:'💧', color:'#06b6d4',
-           why:'Excess fluid accumulates between dialysis sessions causing shortness of breath, swelling, and dangerous cardiac stress.' },
+  k:     { label:'Potassium',  unit:'mg', icon:'🫘', ringColor:['#34d399','#f59e0b','#ef4444'],
+           why:'Failing kidneys cannot remove potassium. High levels can cause dangerous heart arrhythmias and cardiac arrest.' },
+  p:     { label:'Phosphorus', unit:'mg', icon:'🧪', ringColor:['#34d399','#f59e0b','#ef4444'],
+           why:'Excess phosphorus draws calcium from bones, causing weak bones and artery calcification.' },
+  na:    { label:'Sodium',     unit:'mg', icon:'🧂', ringColor:['#34d399','#f59e0b','#ef4444'],
+           why:'Sodium causes thirst and fluid retention. Extra fluid between dialysis sessions raises blood pressure.' },
+  fluid: { label:'Fluid',      unit:'mL', icon:'💧', ringColor:['#34d399','#f59e0b','#ef4444'],
+           why:'Excess fluid builds up between dialysis sessions, causing shortness of breath, swelling, and cardiac stress.' },
 };
 
 const QUICK_FOODS = [
@@ -514,272 +552,314 @@ const QUICK_FOODS = [
 ];
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let LIMITS     = JSON.parse(localStorage.getItem('renalguide_limits') || 'null') || {...DEFAULT_LIMITS};
-let log        = [], nextId = 1, pendingFood = null;
-let prevTotals = { k:0, p:0, na:0, fluid:0 };
+let LIMITS      = JSON.parse(localStorage.getItem('renalguide_limits') || 'null') || {...DEFAULT_LIMITS};
+let log         = [], nextId = 1, pendingFood = null;
+let prevTotals  = { k:0, p:0, na:0, fluid:0 };
 let recentFoods = JSON.parse(localStorage.getItem('renalguide_recent') || '[]');
 
-// Date tracking
 const todayStr = () => new Date().toISOString().slice(0,10);
 let viewingDate = todayStr();
 const isToday   = () => viewingDate === todayStr();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const totals    = () => log.reduce((a,i)=>({k:a.k+i.k, p:a.p+i.p, na:a.na+i.na, fluid:a.fluid+i.fluid}),{k:0,p:0,na:0,fluid:0});
+const totals    = () => log.reduce((a,i)=>({k:a.k+i.k,p:a.p+i.p,na:a.na+i.na,fluid:a.fluid+i.fluid}),{k:0,p:0,na:0,fluid:0});
 const remaining = () => { const t=totals(); return {k:Math.max(0,LIMITS.k-t.k),p:Math.max(0,LIMITS.p-t.p),na:Math.max(0,LIMITS.na-t.na),fluid:Math.max(0,LIMITS.fluid-t.fluid)}; };
 const scale     = (f,g) => { const r=g/100; return {k:+(f.k*r).toFixed(1),p:+(f.p*r).toFixed(1),na:+(f.na*r).toFixed(1),fluid:+(f.fluid*r).toFixed(1),cal:+(f.cal*r).toFixed(1),protein:+(f.protein*r).toFixed(1)}; };
 const pct       = (v,l) => Math.min(100,(v/l)*100);
 const barCls    = p => p>=100?'pbar-danger':p>=75?'pbar-warn':'pbar-safe';
+const ringColor = p => p>=100?'#ef4444':p>=75?'#f59e0b':'#10b981';
 const fmt       = (n,d=0) => Number(n).toFixed(d);
 
 function statusBadge(p) {
-  if(p>=100) return `<span class="status-badge status-danger" aria-label="Danger: limit exceeded">✕ Over limit</span>`;
-  if(p>=75)  return `<span class="status-badge status-warn"   aria-label="Warning: approaching limit">⚠ Warning</span>`;
-  return          `<span class="status-badge status-safe"   aria-label="Safe: within limit">✓ Safe</span>`;
+  if(p>=100) return `<span class="status-badge status-danger">✕ Over limit</span>`;
+  if(p>=75)  return `<span class="status-badge status-warn">⚠ Approaching</span>`;
+  return          `<span class="status-badge status-safe">✓ On track</span>`;
 }
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
-function saveLog() {
-  localStorage.setItem(`renalguide_log_${viewingDate}`, JSON.stringify({log, nextId}));
-}
+function saveLog() { localStorage.setItem(`renalguide_log_${viewingDate}`, JSON.stringify({log,nextId})); }
 
 function loadLog(dateStr) {
   const saved = localStorage.getItem(`renalguide_log_${dateStr}`);
-  if(saved) {
-    const data = JSON.parse(saved);
-    log    = data.log    || [];
-    nextId = data.nextId || log.length + 1;
-  } else {
-    log = []; nextId = 1;
-  }
-  prevTotals = {k:0,p:0,na:0,fluid:0};
+  if(saved) { const d=JSON.parse(saved); log=d.log||[]; nextId=d.nextId||log.length+1; }
+  else { log=[]; nextId=1; }
+  prevTotals={k:0,p:0,na:0,fluid:0};
 }
 
-function saveRecentFoods() {
-  localStorage.setItem('renalguide_recent', JSON.stringify(recentFoods));
-}
+function saveRecentFoods() { localStorage.setItem('renalguide_recent',JSON.stringify(recentFoods)); }
 
 function addToRecent(food) {
-  recentFoods = recentFoods.filter(f => f.name !== food.name);
+  recentFoods = recentFoods.filter(f=>f.name!==food.name);
   recentFoods.unshift({...food});
-  if(recentFoods.length > 8) recentFoods = recentFoods.slice(0,8);
+  if(recentFoods.length>8) recentFoods=recentFoods.slice(0,8);
   saveRecentFoods();
+}
+
+// ─── Streak + weekly ──────────────────────────────────────────────────────────
+function getDayCompliance(dateStr) {
+  const saved = localStorage.getItem(`renalguide_log_${dateStr}`);
+  if(!saved) return null;
+  const {log:dayLog=[]} = JSON.parse(saved);
+  const t = dayLog.reduce((a,i)=>({k:a.k+i.k,p:a.p+i.p,na:a.na+i.na,fluid:a.fluid+i.fluid}),{k:0,p:0,na:0,fluid:0});
+  return t.k<=LIMITS.k && t.p<=LIMITS.p && t.na<=LIMITS.na && t.fluid<=LIMITS.fluid;
+}
+
+function getStreak() {
+  let streak=0, d=new Date();
+  for(let i=0;i<30;i++) {
+    const ds = d.toISOString().slice(0,10);
+    const c = getDayCompliance(ds);
+    if(c===true) { streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
+function renderStreakAndWeek() {
+  const streak = getStreak();
+  const streakEl = document.getElementById('streak-display');
+  if(streak>=2) {
+    streakEl.style.display='';
+    streakEl.innerHTML=`<span class="streak-badge">🔥 ${streak}-day streak!</span>`;
+  } else { streakEl.style.display='none'; }
+
+  // 7-day dots
+  const dotsEl = document.getElementById('weekly-dots');
+  let dotsHtml='';
+  for(let i=6;i>=0;i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const c=getDayCompliance(ds);
+    const color = c===true?'#10b981':c===false?'#ef4444':'rgba(107,114,128,.25)';
+    const label = i===0?'Today':d.toLocaleDateString('en-US',{weekday:'short'});
+    dotsHtml+=`<div class="week-dot" style="background:${color}" title="${label}${c===true?' — all limits met':c===false?' — limit exceeded':' — no data'}"></div>`;
+  }
+  dotsEl.innerHTML=dotsHtml;
+}
+
+function checkAllSafe() {
+  const t=totals();
+  const allSafe = isToday() && log.length>0 && t.k<=LIMITS.k && t.p<=LIMITS.p && t.na<=LIMITS.na && t.fluid<=LIMITS.fluid;
+  document.getElementById('all-safe-badge').style.display = allSafe ? '' : 'none';
+}
+
+// ─── Greeting ─────────────────────────────────────────────────────────────────
+function renderGreeting() {
+  const name = document.getElementById('patient-name').value.trim();
+  const h = new Date().getHours();
+  const time = h<5?'night':h<12?'morning':h<17?'afternoon':'evening';
+  const greets = {morning:['Good morning','Rise and shine','Morning'],afternoon:['Good afternoon','Hey there','Afternoon'],evening:['Good evening','Evening'],night:['Good night','Hey']};
+  const g = greets[time][0];
+  const sub = [
+    "Let's keep your nutrients in check today 💪",
+    "You're doing great — one meal at a time 🌱",
+    "Small choices, big health wins! 🎯",
+    "Your kidneys thank you for tracking 💙",
+  ];
+  const subMsg = sub[new Date().getDay() % sub.length];
+  document.getElementById('greeting-text').textContent = name ? `${g}, ${name}! 👋` : `${g}! 👋`;
+  document.getElementById('greeting-sub').textContent = subMsg;
+}
+
+// ─── Confetti ─────────────────────────────────────────────────────────────────
+function launchConfetti() {
+  const emojis=['🎉','✨','💚','🌿','💧','⭐'];
+  for(let i=0;i<12;i++) {
+    setTimeout(()=>{
+      const el=document.createElement('span');
+      el.className='confetti'; el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left=Math.random()*100+'vw'; el.style.top='-2rem';
+      el.style.animationDuration=(2+Math.random()*1.5)+'s';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),3500);
+    },i*80);
+  }
 }
 
 // ─── Date navigation ──────────────────────────────────────────────────────────
 function navigateDay(delta) {
-  if(delta === 0) {
-    viewingDate = todayStr();
-  } else {
-    const d = new Date(viewingDate);
-    d.setDate(d.getDate() + delta);
-    const newDate = d.toISOString().slice(0,10);
-    if(newDate > todayStr()) return;
-    viewingDate = newDate;
+  if(delta===0) { viewingDate=todayStr(); }
+  else {
+    const d=new Date(viewingDate); d.setDate(d.getDate()+delta);
+    const nd=d.toISOString().slice(0,10);
+    if(nd>todayStr()) return;
+    viewingDate=nd;
   }
-  loadLog(viewingDate);
-  updateDateNav();
-  renderAll();
+  loadLog(viewingDate); updateDateNav(); renderAll();
   announce(`Showing log for ${formatDateLabel(viewingDate)}`);
 }
 
 function formatDateLabel(dateStr) {
-  if(dateStr === todayStr()) return 'Today';
-  const d = new Date(dateStr + 'T12:00:00');
+  if(dateStr===todayStr()) return 'Today';
+  const d=new Date(dateStr+'T12:00:00');
   return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 }
 
 function updateDateNav() {
-  const pastBanner = document.getElementById('past-banner');
-  const pastText   = document.getElementById('past-banner-text');
-  const nextBtn    = document.getElementById('btn-next-day');
-  const clearBtn   = document.getElementById('clear-all-btn');
-  const suggestBtn = document.getElementById('suggest-btn');
-  const isPast     = !isToday();
-
-  nextBtn.disabled  = !isPast;
-  if(clearBtn)   clearBtn.disabled   = isPast;
-  if(suggestBtn) suggestBtn.disabled = isPast;
-
-  if(isPast) {
-    pastBanner.classList.add('visible');
-    pastText.textContent = `Viewing ${formatDateLabel(viewingDate)} — log is read-only`;
-  } else {
-    pastBanner.classList.remove('visible');
-  }
-
-  // Update header date display
-  document.getElementById('date-display').textContent =
-    isToday()
-      ? new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})
-      : formatDateLabel(viewingDate);
+  const pastBanner=document.getElementById('past-banner');
+  const pastText=document.getElementById('past-banner-text');
+  const nextBtn=document.getElementById('btn-next-day');
+  const clearBtn=document.getElementById('clear-all-btn');
+  const suggestBtn=document.getElementById('suggest-btn');
+  const isPast=!isToday();
+  nextBtn.disabled=!isPast;
+  if(clearBtn) clearBtn.disabled=isPast;
+  if(suggestBtn) suggestBtn.disabled=isPast;
+  if(isPast) { pastBanner.classList.add('visible'); pastText.textContent=`Viewing ${formatDateLabel(viewingDate)} — read-only`; }
+  else pastBanner.classList.remove('visible');
+  document.getElementById('date-display').textContent=isToday()?new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}):formatDateLabel(viewingDate);
 }
 
-// ─── Announce for screen readers ──────────────────────────────────────────────
-function announce(msg) {
-  const el = document.getElementById('sr-announce');
-  el.textContent = '';
-  setTimeout(() => { el.textContent = msg; }, 50);
-}
+// ─── Screen reader announce ───────────────────────────────────────────────────
+function announce(msg) { const el=document.getElementById('sr-announce'); el.textContent=''; setTimeout(()=>el.textContent=msg,50); }
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
 function animCounter(el, from, to, dur=600) {
-  const s = performance.now();
-  const step = ts => {
-    const prog = Math.min((ts-s)/dur,1), ease=1-Math.pow(1-prog,3);
-    el.textContent = fmt(from+(to-from)*ease);
-    if(prog<1) requestAnimationFrame(step);
-  };
+  const s=performance.now();
+  const step=ts=>{ const prog=Math.min((ts-s)/dur,1),ease=1-Math.pow(1-prog,3); el.textContent=fmt(from+(to-from)*ease); if(prog<1)requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
-function toast(msg, icon='✅') {
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.setAttribute('role','status');
-  el.innerHTML = `<span aria-hidden="true">${icon}</span><span>${msg}</span>`;
+function toast(msg,icon='✅') {
+  const el=document.createElement('div'); el.className='toast'; el.setAttribute('role','status');
+  el.innerHTML=`<span aria-hidden="true">${icon}</span><span>${msg}</span>`;
   document.getElementById('toast-container').appendChild(el);
-  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),350); }, 2800);
+  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),350); },2800);
 }
 
 // ─── Dark mode ────────────────────────────────────────────────────────────────
 function toggleDark() {
-  const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',t);
-  localStorage.setItem('theme',t);
-  const toggle = document.getElementById('theme-toggle');
-  if(toggle) toggle.setAttribute('aria-checked', t==='dark' ? 'true' : 'false');
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t); localStorage.setItem('theme',t);
+  const tog=document.getElementById('theme-toggle'); if(tog) tog.setAttribute('aria-checked',t==='dark'?'true':'false');
 }
 
 // ─── Font size ────────────────────────────────────────────────────────────────
 function setFontSize(size) {
-  document.documentElement.setAttribute('data-font', size);
-  localStorage.setItem('renalguide_font', size);
-  ['md','lg','xl'].forEach(s => {
-    const btn = document.getElementById('fs-'+s);
-    if(!btn) return;
-    btn.classList.toggle('active', s===size);
-    btn.setAttribute('aria-pressed', s===size ? 'true' : 'false');
-  });
+  document.documentElement.setAttribute('data-font',size); localStorage.setItem('renalguide_font',size);
+  ['md','lg','xl'].forEach(s=>{ const b=document.getElementById('fs-'+s); if(!b)return; b.classList.toggle('active',s===size); b.setAttribute('aria-pressed',s===size?'true':'false'); });
 }
 
 // ─── Ripple ───────────────────────────────────────────────────────────────────
-document.addEventListener('click', e => {
-  const btn = e.target.closest('.btn');
-  if(!btn) return;
-  const r=document.createElement('span'), rect=btn.getBoundingClientRect(), sz=Math.max(rect.width,rect.height);
-  r.className='ripple';
-  Object.assign(r.style,{width:sz+'px',height:sz+'px',left:(e.clientX-rect.left-sz/2)+'px',top:(e.clientY-rect.top-sz/2)+'px'});
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.btn'); if(!btn)return;
+  const r=document.createElement('span'),rect=btn.getBoundingClientRect(),sz=Math.max(rect.width,rect.height);
+  r.className='ripple'; Object.assign(r.style,{width:sz+'px',height:sz+'px',left:(e.clientX-rect.left-sz/2)+'px',top:(e.clientY-rect.top-sz/2)+'px'});
   btn.appendChild(r); setTimeout(()=>r.remove(),500);
 });
 
-// ─── Render nutrient cards ────────────────────────────────────────────────────
+// ─── Render nutrient cards (ring style) ──────────────────────────────────────
+let prevAllSafe = false;
 function renderNutrientCards() {
-  const t = totals();
-  const keys = ['k','p','na','fluid'];
-  document.getElementById('nutrient-cards').innerHTML = keys.map(key => {
-    const info  = NUTRIENT_INFO[key];
-    const val   = t[key], lim = LIMITS[key];
-    const p     = pct(val, lim), rem = Math.max(0, lim - val);
-    const badge = statusBadge(p);
+  const t=totals(), keys=['k','p','na','fluid'];
+  document.getElementById('nutrient-cards').innerHTML=keys.map(key=>{
+    const info=NUTRIENT_INFO[key], val=t[key], lim=LIMITS[key];
+    const p=pct(val,lim), rem=Math.max(0,lim-val);
+    const rc=ringColor(p);
+    const dash=p.toFixed(1), gap=(100-p).toFixed(1);
     return `<div class="glass p-4 fade-in" role="listitem" aria-label="${info.label}: ${fmt(val)} of ${lim} ${info.unit}">
-      <div class="flex justify-between items-start mb-1">
-        <div class="flex items-center gap-1.5">
-          <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--muted)" aria-hidden="true">${info.icon} ${info.label}</p>
-          <div class="tooltip-wrap">
-            <button class="tooltip-btn" aria-label="About ${info.label}" tabindex="0">ℹ</button>
-            <div class="tooltip-content" role="tooltip">${info.why}</div>
-          </div>
+      <div class="flex items-center gap-3">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 36 36" class="ring-svg" aria-hidden="true">
+            <circle cx="18" cy="18" r="15.9" class="ring-bg"/>
+            <circle cx="18" cy="18" r="15.9" class="ring-fill" stroke="${rc}"
+              stroke-dasharray="${dash} ${gap}" stroke-dashoffset="25"/>
+          </svg>
+          <span class="ring-icon">${info.icon}</span>
         </div>
-        <span class="text-sm font-extrabold" id="cnt-${key}" style="color:var(--text)" aria-hidden="true">${fmt(val)}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1 mb-0.5">
+            <p class="text-xs font-black uppercase tracking-wide" style="color:var(--muted)">${info.label}</p>
+            <div class="tooltip-wrap">
+              <button class="tooltip-btn" aria-label="About ${info.label}" tabindex="0">ℹ</button>
+              <div class="tooltip-content" role="tooltip">${info.why}</div>
+            </div>
+          </div>
+          <p class="text-2xl font-black leading-none" id="cnt-${key}" style="color:var(--text)">${fmt(val)}</p>
+          <p class="text-xs mt-0.5 font-600" style="color:var(--muted)">${fmt(rem)} ${info.unit} left</p>
+        </div>
       </div>
-      <div class="flex items-center gap-2 mb-2">
-        ${badge}
-        <span class="text-xs" style="color:var(--muted)">${fmt(rem)} ${info.unit} left</span>
-      </div>
-      <div class="pbar-track" role="progressbar" aria-valuenow="${Math.round(val)}" aria-valuemin="0" aria-valuemax="${lim}" aria-label="${info.label} progress">
+      <div class="mt-3">${statusBadge(p)}</div>
+      <div class="pbar-track mt-2" role="progressbar" aria-valuenow="${Math.round(val)}" aria-valuemin="0" aria-valuemax="${lim}" aria-label="${info.label} progress">
         <div class="pbar-fill ${barCls(p)}" style="width:${p}%"></div>
       </div>
-      <p class="text-right text-xs mt-1.5 font-medium" style="color:var(--muted)" aria-hidden="true">${fmt(val)} / ${lim} ${info.unit}</p>
+      <p class="text-right text-xs mt-1 font-700" style="color:var(--muted)">${fmt(val)} / ${lim} ${info.unit}</p>
     </div>`;
   }).join('');
-  keys.forEach(key => {
-    const el = document.getElementById('cnt-'+key);
-    if(el) animCounter(el, prevTotals[key]||0, t[key]);
-  });
-  prevTotals = {k:t.k, p:t.p, na:t.na, fluid:t.fluid};
+  keys.forEach(key=>{ const el=document.getElementById('cnt-'+key); if(el)animCounter(el,prevTotals[key]||0,t[key]); });
+  prevTotals={k:t.k,p:t.p,na:t.na,fluid:t.fluid};
+
+  // Celebrate if all safe and wasn't before
+  const allSafe=isToday()&&log.length>0&&t.k<=LIMITS.k&&t.p<=LIMITS.p&&t.na<=LIMITS.na&&t.fluid<=LIMITS.fluid;
+  if(allSafe&&!prevAllSafe&&log.length>=2) launchConfetti();
+  prevAllSafe=allSafe;
+  checkAllSafe();
 }
 
-// ─── Fluid cups visual ────────────────────────────────────────────────────────
+// ─── Fluid cups ───────────────────────────────────────────────────────────────
 function renderFluidCups() {
-  const t       = totals();
-  const lim     = LIMITS.fluid;
-  const used    = Math.min(t.fluid, lim);
-  const CUP_ML  = 250;
-  const total   = Math.ceil(lim / CUP_ML);
-  const filled  = Math.floor(used / CUP_ML);
-  const partialPct = ((used % CUP_ML) / CUP_ML);
-  let cups = '';
-  for(let i = 0; i < total; i++) {
-    let cls = 'cup';
-    if(i < filled)       cls += ' filled';
-    else if(i === filled && partialPct > 0) cls += ' partial';
-    cups += `<span class="${cls}" aria-hidden="true" title="${CUP_ML} mL">🥛</span>`;
+  const t=totals(), lim=LIMITS.fluid, used=Math.min(t.fluid,lim), CUP=250;
+  const total=Math.ceil(lim/CUP), filled=Math.floor(used/CUP), partial=(used%CUP)/CUP;
+  let cups='';
+  for(let i=0;i<total;i++) {
+    let cls='cup';
+    if(i<filled) cls+=' filled';
+    else if(i===filled&&partial>0) cls+=' partial';
+    cups+=`<span class="${cls}" aria-hidden="true" title="${CUP} mL">🥤</span>`;
   }
-  document.getElementById('fluid-cups').innerHTML = cups;
-  const p = pct(t.fluid, lim);
-  document.getElementById('fluid-label').textContent =
-    `${fmt(t.fluid)} / ${lim} mL (${Math.round(p)}%)`;
+  document.getElementById('fluid-cups').innerHTML=cups;
+  const p=pct(t.fluid,lim);
+  document.getElementById('fluid-label').textContent=`${fmt(t.fluid)} / ${lim} mL (${Math.round(p)}% used)`;
 }
 
 // ─── Render log ───────────────────────────────────────────────────────────────
 function renderLog() {
-  const el  = document.getElementById('food-log-container');
-  const cnt = document.getElementById('log-count');
-  const isPast = !isToday();
-  cnt.textContent = log.length ? `${log.length} item${log.length>1?'s':''}` : '';
+  const el=document.getElementById('food-log-container');
+  const cnt=document.getElementById('log-count');
+  const isPast=!isToday();
+  cnt.textContent=log.length?`${log.length} item${log.length>1?'s':''}` : '';
   if(!log.length) {
     el.innerHTML=`<div class="text-center py-10 fade-in" style="color:var(--muted)" role="status">
-      <div class="text-5xl mb-3" aria-hidden="true">🥗</div>
-      <p class="text-sm font-medium">No foods logged${isPast?' for this day':' yet'}</p>
-      ${!isPast?`<p class="text-xs mt-1">Search or quick-add a food to begin</p>`:''}
+      <div class="text-5xl mb-3" aria-hidden="true">${isPast?'📅':'🥗'}</div>
+      <p class="text-sm font-bold">${isPast?'No foods logged for this day':'Nothing logged yet'}</p>
+      ${!isPast?`<p class="text-xs mt-1 font-600">Search above or use Quick Add to get started</p>`:''}
     </div>`; return;
   }
   const t=totals();
-  const removeCol = isPast ? '' : '<th class="pb-2 pl-2"></th>';
-  const rows = log.map(item => {
-    const removeBtn = isPast ? '' :
-      `<td class="py-2 pl-2"><button onclick="removeItem(${item.id})" aria-label="Remove ${item.name}" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-size:.85rem;min-width:28px;min-height:28px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button></td>`;
+  const removeCol=isPast?'':'<th class="pb-2 pl-2"></th>';
+  const rows=log.map(item=>{
+    const removeBtn=isPast?'':
+      `<td class="py-2 pl-2"><button onclick="removeItem(${item.id})" aria-label="Remove ${item.name}" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-size:.9rem;min-width:28px;min-height:28px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button></td>`;
     return `<tr class="slide-in" style="border-bottom:1px solid var(--border)">
-      <td class="py-2 pr-2 text-sm font-medium" style="color:var(--text)">${item.name}</td>
-      <td class="py-2 pr-2 text-xs" style="color:var(--muted)">${item.serving}g</td>
-      <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(99,102,241,.12);color:#6366f1">${fmt(item.k)}</span></td>
-      <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(139,92,246,.12);color:#8b5cf6">${fmt(item.p)}</span></td>
-      <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(236,72,153,.12);color:#ec4899">${fmt(item.na)}</span></td>
-      <td class="py-2 pr-2 text-xs text-right" style="color:var(--muted)">${fmt(item.fluid)}</td>
-      <td class="py-2 text-xs text-right" style="color:var(--muted)">${fmt(item.cal)}</td>
+      <td class="py-2 pr-2 text-sm font-bold" style="color:var(--text)">${item.name}</td>
+      <td class="py-2 pr-2 text-xs font-600" style="color:var(--muted)">${item.serving}g</td>
+      <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(13,148,136,.12);color:#0d9488">${fmt(item.k)}</span></td>
+      <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(6,182,212,.12);color:#0891b2">${fmt(item.p)}</span></td>
+      <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(249,115,22,.12);color:#ea580c">${fmt(item.na)}</span></td>
+      <td class="py-2 pr-2 text-xs text-right font-600" style="color:var(--muted)">${fmt(item.fluid)}</td>
+      <td class="py-2 text-xs text-right font-600" style="color:var(--muted)">${fmt(item.cal)}</td>
       ${removeBtn}
     </tr>`;
   }).join('');
   el.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left" aria-label="Today's food log">
     <thead><tr style="border-bottom:2px solid var(--border)">
-      <th class="pb-2 text-xs font-bold pr-2" style="color:var(--muted)" scope="col">Food</th>
-      <th class="pb-2 text-xs font-bold pr-2" style="color:var(--muted)" scope="col">Serving</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#6366f1" scope="col">K (mg)</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#8b5cf6" scope="col">P (mg)</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:#ec4899" scope="col">Na (mg)</th>
-      <th class="pb-2 text-xs font-bold pr-2 text-right" style="color:var(--muted)" scope="col">Fluid (mL)</th>
-      <th class="pb-2 text-xs font-bold text-right" style="color:var(--muted)" scope="col">Cal</th>
+      <th class="pb-2 text-xs font-black pr-2" style="color:var(--muted)" scope="col">Food</th>
+      <th class="pb-2 text-xs font-black pr-2" style="color:var(--muted)" scope="col">Serving</th>
+      <th class="pb-2 text-xs font-black pr-2 text-right" style="color:#0d9488" scope="col">K</th>
+      <th class="pb-2 text-xs font-black pr-2 text-right" style="color:#0891b2" scope="col">P</th>
+      <th class="pb-2 text-xs font-black pr-2 text-right" style="color:#ea580c" scope="col">Na</th>
+      <th class="pb-2 text-xs font-black pr-2 text-right" style="color:var(--muted)" scope="col">Fluid</th>
+      <th class="pb-2 text-xs font-black text-right" style="color:var(--muted)" scope="col">Cal</th>
       ${removeCol}
     </tr></thead>
     <tbody>${rows}</tbody>
     <tfoot><tr style="border-top:2px solid var(--border)">
-      <td class="pt-2 text-sm font-bold" style="color:var(--text)" colspan="2">Total</td>
-      <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.k>LIMITS.k?'#ef4444':'#6366f1'}">${fmt(t.k)}</td>
-      <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.p>LIMITS.p?'#ef4444':'#8b5cf6'}">${fmt(t.p)}</td>
-      <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.na>LIMITS.na?'#ef4444':'#ec4899'}">${fmt(t.na)}</td>
-      <td class="pt-2 text-xs text-right pr-2 font-bold" style="color:${t.fluid>LIMITS.fluid?'#ef4444':'var(--muted)'}">${fmt(t.fluid)}</td>
+      <td class="pt-2 text-sm font-black" style="color:var(--text)" colspan="2">Total</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.k>LIMITS.k?'#ef4444':'#0d9488'}">${fmt(t.k)}</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.p>LIMITS.p?'#ef4444':'#0891b2'}">${fmt(t.p)}</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.na>LIMITS.na?'#ef4444':'#ea580c'}">${fmt(t.na)}</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.fluid>LIMITS.fluid?'#ef4444':'var(--muted)'}">${fmt(t.fluid)}</td>
       <td class="pt-2" colspan="${isPast?1:2}"></td>
     </tr></tfoot>
   </table></div>`;
@@ -787,304 +867,214 @@ function renderLog() {
 
 // ─── Recent foods ─────────────────────────────────────────────────────────────
 function renderRecentFoods() {
-  const section = document.getElementById('recent-section');
-  const el      = document.getElementById('recent-list');
-  if(!recentFoods.length || !isToday()) { section.style.display='none'; return; }
+  const section=document.getElementById('recent-section');
+  const el=document.getElementById('recent-list');
+  if(!recentFoods.length||!isToday()){section.style.display='none';return;}
   section.style.display='';
-  el.innerHTML = recentFoods.map((f,i) => `
+  el.innerHTML=recentFoods.map((f,i)=>`
     <div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border)" role="listitem">
       <div class="flex-1 min-w-0 pr-2">
-        <p class="text-sm font-medium truncate" style="color:var(--text)">${f.name}</p>
-        <p class="text-xs" style="color:var(--muted)">K:${f.k} · P:${f.p} · Na:${f.na}</p>
+        <p class="text-sm font-bold truncate" style="color:var(--text)">${f.name}</p>
+        <p class="text-xs font-600" style="color:var(--muted)">K:${f.k} · P:${f.p} · Na:${f.na}</p>
       </div>
-      <button class="btn btn-ghost text-xs py-1 px-2.5" onclick="openModal(recentFoods[${i}])"
-              aria-label="Add ${f.name} to log">+ Add</button>
+      <button class="btn btn-ghost text-xs py-1 px-3" onclick="openModal(recentFoods[${i}])"
+              aria-label="Add ${f.name}">+ Add</button>
     </div>`).join('');
 }
 
 // ─── Quick add ────────────────────────────────────────────────────────────────
 function renderQuickAdd() {
-  document.getElementById('quick-add-list').innerHTML = QUICK_FOODS.map((f,i)=>`
+  document.getElementById('quick-add-list').innerHTML=QUICK_FOODS.map((f,i)=>`
     <div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border)" role="listitem">
       <div class="flex-1 min-w-0 pr-2">
-        <p class="text-sm font-medium truncate" style="color:var(--text)">${f.name}</p>
-        <p class="text-xs" style="color:var(--muted)">K:${f.k} · P:${f.p} · Na:${f.na}</p>
+        <p class="text-sm font-bold truncate" style="color:var(--text)">${f.name}</p>
+        <p class="text-xs font-600" style="color:var(--muted)">K:${f.k} · P:${f.p} · Na:${f.na}</p>
       </div>
-      <button class="btn btn-ghost text-xs py-1 px-2.5" onclick="openModal(QUICK_FOODS[${i}])"
-              ${!isToday()?'disabled':''}
-              aria-label="Add ${f.name} to log">+ Add</button>
+      <button class="btn btn-ghost text-xs py-1 px-3" onclick="openModal(QUICK_FOODS[${i}])"
+              ${!isToday()?'disabled':''} aria-label="Add ${f.name}">+ Add</button>
     </div>`).join('');
 }
 
-// ─── Serving modal ────────────────────────────────────────────────────────────
+// ─── Modal ────────────────────────────────────────────────────────────────────
 function openModal(food) {
-  if(!isToday()) return;
-  pendingFood = food;
-  document.getElementById('modal-food-name').textContent    = food.name;
-  document.getElementById('modal-food-details').textContent = `Per 100 g — K:${food.k} mg · P:${food.p} mg · Na:${food.na} mg · Fluid:${food.fluid} mL`;
-  document.getElementById('serving-input').value = 100;
+  if(!isToday())return;
+  pendingFood=food;
+  document.getElementById('modal-food-name').textContent=food.name;
+  document.getElementById('modal-food-details').textContent=`Per 100 g — K:${food.k} mg · P:${food.p} mg · Na:${food.na} mg · Fluid:${food.fluid} mL`;
+  document.getElementById('serving-input').value=100;
   updateServingPreview();
-  const backdrop = document.getElementById('modal-backdrop');
-  backdrop.style.display = 'flex';
-  setTimeout(() => document.getElementById('serving-input').focus(), 50);
-  trapFocus(backdrop);
+  const bd=document.getElementById('modal-backdrop'); bd.style.display='flex';
+  setTimeout(()=>document.getElementById('serving-input').focus(),50);
+  trapFocus(bd);
 }
-function closeModal() {
-  document.getElementById('modal-backdrop').style.display='none';
-  pendingFood=null;
-}
-function updateServingPreview() {
+function closeModal(){document.getElementById('modal-backdrop').style.display='none';pendingFood=null;}
+function updateServingPreview(){
   const g=parseFloat(document.getElementById('serving-input').value)||0;
-  if(!pendingFood) return;
+  if(!pendingFood)return;
   const s=scale(pendingFood,g);
   document.getElementById('serving-preview').textContent=`→ K:${s.k} mg · P:${s.p} mg · Na:${s.na} mg · Fluid:${s.fluid} mL · ${s.cal} kcal`;
 }
-function confirmAdd() {
+function confirmAdd(){
   const g=parseFloat(document.getElementById('serving-input').value)||100;
   const s=scale(pendingFood,g);
-  log.push({id:nextId++, name:pendingFood.name, serving:g, ...s});
-  addToRecent(pendingFood);
-  closeModal();
-  saveLog();
-  renderAll();
-  toast(`Added ${pendingFood.name}`,'🍽');
-  announce(`${pendingFood.name} added to log`);
+  log.push({id:nextId++,name:pendingFood.name,serving:g,...s});
+  addToRecent(pendingFood); closeModal(); saveLog(); renderAll();
+  toast(`Added ${pendingFood.name}`,'🍽'); announce(`${pendingFood.name} added to log`);
 }
 
 // ─── Limits modal ─────────────────────────────────────────────────────────────
-function openLimitsModal() {
-  document.getElementById('lim-k').value  = LIMITS.k;
-  document.getElementById('lim-p').value  = LIMITS.p;
-  document.getElementById('lim-na').value = LIMITS.na;
-  document.getElementById('lim-fl').value = LIMITS.fluid;
-  const backdrop = document.getElementById('limits-backdrop');
-  backdrop.style.display = 'flex';
-  setTimeout(() => document.getElementById('lim-k').focus(), 50);
-  trapFocus(backdrop);
+function openLimitsModal(){
+  document.getElementById('lim-k').value=LIMITS.k; document.getElementById('lim-p').value=LIMITS.p;
+  document.getElementById('lim-na').value=LIMITS.na; document.getElementById('lim-fl').value=LIMITS.fluid;
+  const bd=document.getElementById('limits-backdrop'); bd.style.display='flex';
+  setTimeout(()=>document.getElementById('lim-k').focus(),50); trapFocus(bd);
 }
-function closeLimitsModal() { document.getElementById('limits-backdrop').style.display='none'; }
-function saveLimits() {
-  LIMITS.k     = parseInt(document.getElementById('lim-k').value)  || DEFAULT_LIMITS.k;
-  LIMITS.p     = parseInt(document.getElementById('lim-p').value)  || DEFAULT_LIMITS.p;
-  LIMITS.na    = parseInt(document.getElementById('lim-na').value) || DEFAULT_LIMITS.na;
-  LIMITS.fluid = parseInt(document.getElementById('lim-fl').value) || DEFAULT_LIMITS.fluid;
-  localStorage.setItem('renalguide_limits', JSON.stringify(LIMITS));
-  closeLimitsModal();
-  renderAll();
-  toast('Limits updated','⚙');
+function closeLimitsModal(){document.getElementById('limits-backdrop').style.display='none';}
+function saveLimits(){
+  LIMITS.k=parseInt(document.getElementById('lim-k').value)||DEFAULT_LIMITS.k;
+  LIMITS.p=parseInt(document.getElementById('lim-p').value)||DEFAULT_LIMITS.p;
+  LIMITS.na=parseInt(document.getElementById('lim-na').value)||DEFAULT_LIMITS.na;
+  LIMITS.fluid=parseInt(document.getElementById('lim-fl').value)||DEFAULT_LIMITS.fluid;
+  localStorage.setItem('renalguide_limits',JSON.stringify(LIMITS));
+  closeLimitsModal(); renderAll(); toast('Limits updated ✓','⚙');
 }
 
-// ─── Focus trap (accessibility) ───────────────────────────────────────────────
-function trapFocus(container) {
-  const focusable = container.querySelectorAll('button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
-  const first = focusable[0], last = focusable[focusable.length-1];
-  function onKey(e) {
-    if(e.key !== 'Tab') return;
-    if(e.shiftKey) { if(document.activeElement===first){ e.preventDefault(); last.focus(); } }
-    else           { if(document.activeElement===last) { e.preventDefault(); first.focus(); } }
-  }
-  function onEsc(e) {
-    if(e.key === 'Escape') {
-      container.removeEventListener('keydown', onKey);
-      container.removeEventListener('keydown', onEsc);
-      if(container.id==='modal-backdrop')  closeModal();
-      if(container.id==='limits-backdrop') closeLimitsModal();
-    }
-  }
-  container.addEventListener('keydown', onKey);
-  container.addEventListener('keydown', onEsc);
+// ─── Focus trap ───────────────────────────────────────────────────────────────
+function trapFocus(container){
+  const focusable=container.querySelectorAll('button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+  const first=focusable[0],last=focusable[focusable.length-1];
+  function onKey(e){if(e.key!=='Tab')return;if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}else{if(document.activeElement===last){e.preventDefault();first.focus();}}}
+  function onEsc(e){if(e.key==='Escape'){container.removeEventListener('keydown',onKey);container.removeEventListener('keydown',onEsc);if(container.id==='modal-backdrop')closeModal();if(container.id==='limits-backdrop')closeLimitsModal();}}
+  container.addEventListener('keydown',onKey); container.addEventListener('keydown',onEsc);
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
-async function searchFoods() {
-  if(!isToday()) return;
-  const q=document.getElementById('search-input').value.trim();
-  if(!q) return;
+async function searchFoods(){
+  if(!isToday())return;
+  const q=document.getElementById('search-input').value.trim(); if(!q)return;
   const el=document.getElementById('search-results');
-  el.innerHTML=`<div class="flex items-center gap-2 text-sm py-3" style="color:var(--muted)" role="status">
+  el.innerHTML=`<div class="flex items-center gap-2 text-sm py-3 font-600" style="color:var(--muted)" role="status">
     <svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-    Searching USDA database…</div>`;
+    Searching database…</div>`;
   try {
     const foods=await (await fetch(`/api/food-search?q=${encodeURIComponent(q)}`)).json();
     window._sr=foods;
-    if(!foods.length){
-      el.innerHTML=`<p class="text-sm py-3" style="color:var(--muted)" role="status">No results. Try a different term.</p>`;
-      announce('No search results found');
-      return;
-    }
+    if(!foods.length){el.innerHTML=`<p class="text-sm py-3 font-600" style="color:var(--muted)" role="status">No results found — try a different term.</p>`;announce('No results');return;}
     el.innerHTML=foods.map((f,i)=>`
       <div class="fade-in glass p-3" role="listitem">
-        <p class="text-sm font-semibold mb-1" style="color:var(--text)">${f.description}</p>
-        <p class="text-xs mb-2" style="color:var(--muted)">K:${fmt(f.potassium)} · P:${fmt(f.phosphorus)} · Na:${fmt(f.sodium)} per 100g</p>
-        <button class="btn btn-primary text-xs py-1 px-3"
+        <p class="text-sm font-bold mb-1" style="color:var(--text)">${f.description}</p>
+        <p class="text-xs mb-2 font-600" style="color:var(--muted)">K:${fmt(f.potassium)} · P:${fmt(f.phosphorus)} · Na:${fmt(f.sodium)} per 100g</p>
+        <button class="btn btn-primary text-xs py-1.5 px-3.5"
                 aria-label="Add ${f.description} to log"
                 onclick="openModal({name:window._sr[${i}].description,k:window._sr[${i}].potassium,p:window._sr[${i}].phosphorus,na:window._sr[${i}].sodium,fluid:window._sr[${i}].water,cal:window._sr[${i}].calories,protein:window._sr[${i}].protein})">+ Add to Log</button>
       </div>`).join('');
     announce(`${foods.length} results found`);
-  } catch(e) {
-    el.innerHTML=`<p class="text-sm py-3" style="color:#ef4444" role="alert">Search failed: ${e.message}</p>`;
-  }
+  } catch(e){el.innerHTML=`<p class="text-sm py-3 font-600" style="color:#ef4444" role="alert">Search failed: ${e.message}</p>`;}
 }
 
 // ─── AI planner ───────────────────────────────────────────────────────────────
-async function getMealSuggestion() {
-  const btn=document.getElementById('suggest-btn');
-  const el=document.getElementById('ai-suggestion-container');
-  const meal=document.getElementById('meal-type').value;
-  const rem=remaining();
+async function getMealSuggestion(){
+  const btn=document.getElementById('suggest-btn'),el=document.getElementById('ai-suggestion-container');
+  const meal=document.getElementById('meal-type').value, rem=remaining();
   btn.disabled=true;
   btn.innerHTML=`<svg class="w-4 h-4 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Thinking…`;
-  el.innerHTML=`<div class="glass p-4 fade-in" style="border-color:rgba(139,92,246,.25)" role="status">
+  el.innerHTML=`<div class="glass p-4 fade-in" style="border-color:rgba(249,115,22,.25)" role="status">
     <div class="flex items-center gap-2 mb-2">
-      <svg class="w-4 h-4 spinner" style="color:var(--accent)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-      <span class="text-sm font-medium" style="color:var(--accent)">Designing your renal-safe ${meal}…</span>
+      <svg class="w-4 h-4 spinner" style="color:var(--accent2)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      <span class="text-sm font-bold" style="color:var(--accent2)">Crafting your perfect renal-safe ${meal}…</span>
     </div>
-    <div class="h-2 rounded-full overflow-hidden" style="background:rgba(99,102,241,.1)">
-      <div class="h-full rounded-full pbar-fill pbar-safe" style="width:0%;animation:grow 4s ease-out forwards"></div>
+    <div class="h-2 rounded-full overflow-hidden" style="background:rgba(249,115,22,.1)">
+      <div class="h-full rounded-full" style="background:linear-gradient(90deg,#f97316,#f59e0b);width:0%;animation:grow 4s ease-out forwards"></div>
     </div>
-  </div>
-  <style>@keyframes grow{to{width:85%}}</style>`;
+  </div><style>@keyframes grow{to{width:85%}}</style>`;
   try {
     const r=await fetch('/api/meal-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({remaining:{potassium:rem.k,phosphorus:rem.p,sodium:rem.na,fluid:rem.fluid},loggedFoods:log.map(i=>i.name),mealType:meal})});
     const data=await r.json();
-    if(data.error) throw new Error(data.error);
-    el.innerHTML=`<div class="fade-in glass p-5" style="border-color:rgba(139,92,246,.3);background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.06))" role="region" aria-label="AI meal suggestion">
+    if(data.error)throw new Error(data.error);
+    el.innerHTML=`<div class="fade-in glass p-5" style="border-color:rgba(249,115,22,.3);background:linear-gradient(135deg,rgba(249,115,22,.05),rgba(245,158,11,.05))" role="region" aria-label="AI meal suggestion">
       <div class="flex items-center gap-2 mb-3">
-        <span aria-hidden="true" style="font-size:1.2rem">✨</span>
-        <span class="text-sm font-bold grad-text">Llama's ${meal} suggestion</span>
+        <span aria-hidden="true" style="font-size:1.3rem">✨</span>
+        <span class="text-sm font-black grad-text-coral">Your personalized ${meal}</span>
       </div>
-      <div class="text-sm leading-relaxed" style="color:var(--text)">${formatMd(data.suggestion)}</div>
-      <p class="text-xs mt-4 pt-3" style="color:var(--muted);border-top:1px solid var(--border)">For reference only. Consult your renal dietitian for personalized advice.</p>
+      <div class="text-sm leading-relaxed font-600" style="color:var(--text)">${formatMd(data.suggestion)}</div>
+      <p class="text-xs mt-4 pt-3 font-600" style="color:var(--muted);border-top:1px solid var(--border)">For reference only. Always consult your renal dietitian for personalized medical advice.</p>
     </div>`;
-    toast('Meal suggestion ready!','✨');
-    announce('Meal suggestion is ready');
-  } catch(e) {
+    toast('Your meal suggestion is ready!','✨'); announce('Meal suggestion ready');
+  } catch(e){
     el.innerHTML=`<div class="glass p-4 fade-in" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06)" role="alert">
-      <p class="text-sm font-semibold" style="color:#ef4444">⚠ Error</p>
-      <p class="text-xs mt-1" style="color:var(--muted)">${e.message}</p>
+      <p class="text-sm font-black" style="color:#ef4444">⚠ Something went wrong</p>
+      <p class="text-xs mt-1 font-600" style="color:var(--muted)">${e.message}</p>
     </div>`;
   } finally {
     btn.disabled=false;
-    btn.innerHTML=`<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Suggest Meal`;
+    btn.innerHTML=`<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Suggest Meal`;
   }
 }
 
-function formatMd(t) {
-  return t
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^- (.+)$/gm,'<li style="margin-left:1rem;list-style:disc">$1</li>')
-    .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
+function formatMd(t){
+  return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+          .replace(/^- (.+)$/gm,'<li style="margin-left:1rem;list-style:disc">$1</li>')
+          .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
 }
 
 // ─── Log actions ──────────────────────────────────────────────────────────────
-function removeItem(id) {
-  if(!isToday()) return;
-  const item=log.find(i=>i.id===id);
-  log=log.filter(i=>i.id!==id);
-  saveLog();
-  renderAll();
-  if(item) { toast(`Removed ${item.name}`,'🗑'); announce(`${item.name} removed from log`); }
+function removeItem(id){
+  if(!isToday())return;
+  const item=log.find(i=>i.id===id); log=log.filter(i=>i.id!==id);
+  saveLog(); renderAll();
+  if(item){toast(`Removed ${item.name}`,'🗑');announce(`${item.name} removed`);}
 }
-function clearLog() {
-  if(!isToday() || !log.length) return;
-  if(confirm('Clear all logged foods for today?')) {
-    log=[]; saveLog(); renderAll(); toast('Log cleared','🗑'); announce('Food log cleared');
-  }
+function clearLog(){
+  if(!isToday()||!log.length)return;
+  if(confirm('Clear all logged foods for today?')){log=[];saveLog();renderAll();toast('Log cleared','🗑');announce('Log cleared');}
 }
 
 // ─── Print ────────────────────────────────────────────────────────────────────
-function printLog() {
-  const t   = totals();
-  const date = isToday()
-    ? new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
-    : formatDateLabel(viewingDate);
-  const name = document.getElementById('patient-name').value.trim() || 'Patient';
-  const rows = log.map(item =>
-    `<tr><td>${item.name}</td><td>${item.serving}g</td><td>${fmt(item.k)}</td><td>${fmt(item.p)}</td><td>${fmt(item.na)}</td><td>${fmt(item.fluid)}</td><td>${fmt(item.cal)}</td></tr>`
-  ).join('');
-  const win = window.open('','_blank','width=700,height=800');
-  win.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
-    <title>RenalGuide — ${name} — ${date}</title>
-    <style>
-      body{font-family:Arial,sans-serif;padding:2rem;color:#111;font-size:13px}
-      h1{font-size:1.4rem;margin-bottom:.25rem}
-      h2{font-size:.85rem;color:#555;margin-bottom:1.5rem;font-weight:normal}
-      table{border-collapse:collapse;width:100%;margin-bottom:1.5rem}
-      th,td{border:1px solid #ccc;padding:6px 10px;text-align:left}
-      th{background:#f0f0f0;font-weight:600}
-      tfoot td{font-weight:bold;background:#f9f9f9}
-      .limits{margin-bottom:1.5rem;font-size:.82rem;color:#444;line-height:1.7}
-      .footer{margin-top:2rem;font-size:.78rem;color:#888;border-top:1px solid #ddd;padding-top:.75rem}
-    </style></head><body>
-    <h1>RenalGuide — Daily Food Log</h1>
-    <h2>${name} &nbsp;·&nbsp; ${date}</h2>
-    <div class="limits">
-      <strong>Daily Limits:</strong>
-      K: ${LIMITS.k} mg &nbsp;|&nbsp; P: ${LIMITS.p} mg &nbsp;|&nbsp; Na: ${LIMITS.na} mg &nbsp;|&nbsp; Fluid: ${LIMITS.fluid} mL
-    </div>
-    <table>
-      <thead><tr><th>Food</th><th>Serving</th><th>K (mg)</th><th>P (mg)</th><th>Na (mg)</th><th>Fluid (mL)</th><th>Cal</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:#999">No foods logged</td></tr>'}</tbody>
-      <tfoot><tr><td colspan="2">Total</td><td>${fmt(t.k)}</td><td>${fmt(t.p)}</td><td>${fmt(t.na)}</td><td>${fmt(t.fluid)}</td><td></td></tr></tfoot>
-    </table>
+function printLog(){
+  const t=totals();
+  const date=isToday()?new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}):formatDateLabel(viewingDate);
+  const name=document.getElementById('patient-name').value.trim()||'Patient';
+  const rows=log.map(item=>`<tr><td>${item.name}</td><td>${item.serving}g</td><td>${fmt(item.k)}</td><td>${fmt(item.p)}</td><td>${fmt(item.na)}</td><td>${fmt(item.fluid)}</td><td>${fmt(item.cal)}</td></tr>`).join('');
+  const win=window.open('','_blank','width=700,height=800');
+  win.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><title>RenalGuide — ${name} — ${date}</title>
+    <style>body{font-family:'Nunito',Arial,sans-serif;padding:2rem;color:#134e4a;font-size:13px}h1{font-size:1.4rem;margin-bottom:.2rem;color:#0d9488}h2{font-size:.85rem;color:#6b7280;margin-bottom:1.5rem;font-weight:600}table{border-collapse:collapse;width:100%;margin-bottom:1.5rem}th,td{border:1px solid #cce8e4;padding:6px 10px;text-align:left}th{background:#f0fdf8;font-weight:800;color:#0d9488}tfoot td{font-weight:800;background:#f9fffe}.limits{margin-bottom:1.5rem;font-size:.82rem;color:#6b7280;line-height:1.8;padding:.75rem 1rem;background:#f0fdf8;border-radius:.5rem}.footer{margin-top:2rem;font-size:.75rem;color:#9ca3af;border-top:1px solid #cce8e4;padding-top:.75rem}</style></head><body>
+    <h1>🫀 RenalGuide — Daily Food Log</h1><h2>${name} · ${date}</h2>
+    <div class="limits"><strong>Daily Limits:</strong> K: ${LIMITS.k} mg | P: ${LIMITS.p} mg | Na: ${LIMITS.na} mg | Fluid: ${LIMITS.fluid} mL</div>
+    <table><thead><tr><th>Food</th><th>Serving</th><th>K (mg)</th><th>P (mg)</th><th>Na (mg)</th><th>Fluid (mL)</th><th>Cal</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="7" style="text-align:center;color:#9ca3af">No foods logged</td></tr>'}</tbody>
+    <tfoot><tr><td colspan="2">Total</td><td>${fmt(t.k)}</td><td>${fmt(t.p)}</td><td>${fmt(t.na)}</td><td>${fmt(t.fluid)}</td><td></td></tr></tfoot></table>
     <div class="footer">Generated by RenalGuide · For reference only · Consult your renal dietitian for personalized advice</div>
     </body></html>`);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 400);
+  win.document.close(); win.focus(); setTimeout(()=>win.print(),400);
 }
 
 // ─── Render all ───────────────────────────────────────────────────────────────
-function renderAll() {
-  renderNutrientCards();
-  renderLog();
-  renderFluidCups();
-  renderRecentFoods();
-  renderQuickAdd();
+function renderAll(){
+  renderNutrientCards(); renderLog(); renderFluidCups();
+  renderRecentFoods(); renderQuickAdd(); renderStreakAndWeek();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  // Theme
-  const savedTheme = localStorage.getItem('theme');
-  if(savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    const toggle = document.getElementById('theme-toggle');
-    if(toggle) toggle.setAttribute('aria-checked', savedTheme==='dark' ? 'true' : 'false');
-  }
+document.addEventListener('DOMContentLoaded',()=>{
+  const savedTheme=localStorage.getItem('theme');
+  if(savedTheme){ document.documentElement.setAttribute('data-theme',savedTheme); const tog=document.getElementById('theme-toggle'); if(tog)tog.setAttribute('aria-checked',savedTheme==='dark'?'true':'false'); }
 
-  // Font size
-  const savedFont = localStorage.getItem('renalguide_font') || 'md';
-  setFontSize(savedFont);
+  const savedFont=localStorage.getItem('renalguide_font')||'md'; setFontSize(savedFont);
 
-  // Patient name
-  const savedName = localStorage.getItem('renalguide_name');
-  if(savedName) document.getElementById('patient-name').value = savedName;
-  document.getElementById('patient-name').addEventListener('change', e => {
-    localStorage.setItem('renalguide_name', e.target.value.trim());
+  const savedName=localStorage.getItem('renalguide_name');
+  if(savedName) document.getElementById('patient-name').value=savedName;
+  document.getElementById('patient-name').addEventListener('change',e=>{
+    localStorage.setItem('renalguide_name',e.target.value.trim()); renderGreeting();
   });
 
-  // Date
-  viewingDate = todayStr();
-  loadLog(viewingDate);
-  updateDateNav();
+  viewingDate=todayStr(); loadLog(viewingDate); updateDateNav();
+  renderGreeting(); renderQuickAdd(); renderAll();
 
-  // Render
-  renderQuickAdd();
-  renderAll();
-
-  // Keyboard shortcuts
-  document.getElementById('search-input').addEventListener('keydown', e => { if(e.key==='Enter') searchFoods(); });
-  document.getElementById('serving-input').addEventListener('input',   updateServingPreview);
-  document.getElementById('serving-input').addEventListener('keydown', e => { if(e.key==='Enter') confirmAdd(); });
-
-  // Close modals on backdrop click
-  document.getElementById('modal-backdrop').addEventListener('click', e => {
-    if(e.target===document.getElementById('modal-backdrop')) closeModal();
-  });
-  document.getElementById('limits-backdrop').addEventListener('click', e => {
-    if(e.target===document.getElementById('limits-backdrop')) closeLimitsModal();
-  });
+  document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')searchFoods();});
+  document.getElementById('serving-input').addEventListener('input',updateServingPreview);
+  document.getElementById('serving-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAdd();});
+  document.getElementById('modal-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('modal-backdrop'))closeModal();});
+  document.getElementById('limits-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('limits-backdrop'))closeLimitsModal();});
 });
 </script>
 </body>
