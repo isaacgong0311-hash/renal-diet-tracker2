@@ -268,6 +268,37 @@
       #food-log-container table { border-collapse:collapse; width:100%; }
       #food-log-container td, #food-log-container th { border:1px solid #ddd; padding:4px 8px; font-size:11px; }
     }
+
+    /* Health score ring */
+    .score-ring { width:56px;height:56px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.65rem;font-weight:900;border:3px solid;flex-shrink:0; }
+    .score-A { border-color:#10b981;color:#10b981;background:rgba(16,185,129,.12); }
+    .score-B { border-color:#34d399;color:#059669;background:rgba(52,211,153,.1); }
+    .score-C { border-color:#fbbf24;color:#d97706;background:rgba(251,191,36,.12); }
+    .score-D { border-color:#f97316;color:#ea580c;background:rgba(249,115,22,.12); }
+    .score-F { border-color:#ef4444;color:#dc2626;background:rgba(239,68,68,.12); }
+
+    /* Meal type badges */
+    .meal-badge { display:inline-flex;align-items:center;gap:.2rem;padding:.1rem .45rem;border-radius:2rem;font-size:.67rem;font-weight:800; }
+    .meal-breakfast { background:rgba(249,115,22,.15);color:#c2410c; }
+    .meal-lunch     { background:rgba(16,185,129,.15);color:#065f46; }
+    .meal-dinner    { background:rgba(99,102,241,.15);color:#4338ca; }
+    .meal-snack     { background:rgba(236,72,153,.15);color:#be185d; }
+
+    /* Dialysis Day mode */
+    .dialysis-btn { background:var(--surface);border:1.5px solid var(--border);color:var(--muted);border-radius:9999px;cursor:pointer;padding:.28rem .75rem;font-weight:800;font-family:'Nunito',sans-serif;transition:all .2s;font-size:.75rem;line-height:1.4; }
+    .dialysis-btn.active { border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,.08);box-shadow:0 0 0 2px rgba(239,68,68,.15); }
+    #greeting-section.dialysis-active { background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(249,115,22,.07)) !important;border:1.5px solid rgba(239,68,68,.25) !important; }
+
+    /* Lab values */
+    .lab-entry { display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid var(--border); }
+    .lab-entry:last-child { border-bottom:none; }
+    .trend-up   { color:#ef4444;font-weight:800;font-size:.85rem; }
+    .trend-down { color:#10b981;font-weight:800;font-size:.85rem; }
+    .trend-flat { color:var(--muted);font-weight:800;font-size:.85rem; }
+    .lab-chip { display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .7rem;border-radius:9999px;font-size:.75rem;font-weight:700;background:var(--surface);border:1.5px solid var(--border); }
+
+    /* Custom food modal */
+    .custom-grid { display:grid;grid-template-columns:1fr 1fr;gap:.75rem; }
   </style>
 </head>
 <body>
@@ -308,6 +339,13 @@
         Print
       </button>
 
+      <!-- Dialysis Day toggle -->
+      <button id="dialysis-day-btn" class="dialysis-btn no-print" onclick="toggleDialysisDay()"
+              aria-pressed="false" aria-label="Toggle dialysis day mode"
+              title="Dialysis Day: reduces fluid limit to 1,000 mL">
+        🩺 Dialysis Day
+      </button>
+
       <!-- Dark mode -->
       <div class="flex items-center gap-1.5" role="group" aria-label="Color theme">
         <span aria-hidden="true" style="font-size:.85rem">🌙</span>
@@ -327,9 +365,13 @@
   <!-- Greeting + streak -->
   <div class="greeting-card fade-in" id="greeting-section">
     <div class="flex items-center justify-between flex-wrap gap-3">
-      <div>
-        <p id="greeting-text" class="text-xl font-black" style="color:var(--text)">Welcome back! 👋</p>
-        <p id="greeting-sub" class="text-sm font-600 mt-0.5" style="color:var(--muted)">Track your nutrients and stay healthy today.</p>
+      <div class="flex items-center gap-3">
+        <div id="health-score-ring" style="display:none" aria-label="Daily health score"></div>
+        <div>
+          <p id="greeting-text" class="text-xl font-black" style="color:var(--text)">Welcome back! 👋</p>
+          <p id="greeting-sub" class="text-sm font-600 mt-0.5" style="color:var(--muted)">Track your nutrients and stay healthy today.</p>
+          <p id="dialysis-day-label" class="text-xs font-800 mt-1" style="color:#ef4444;display:none">🩺 Dialysis Day — fluid limit set to 1,000 mL</p>
+        </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <div id="weekly-dots" class="flex items-center gap-1.5" aria-label="Last 7 days compliance" title="Last 7 days — green = all limits met"></div>
@@ -359,7 +401,7 @@
       <span id="past-banner-text">Viewing a past day — log is read-only</span>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="nutrient-cards" role="list" aria-label="Nutrient intake summary"></div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3" id="nutrient-cards" role="list" aria-label="Nutrient intake summary"></div>
   </section>
 
   <!-- Fluid visual tracker -->
@@ -433,8 +475,12 @@
             <span id="log-count" class="text-xs font-bold px-2.5 py-0.5 rounded-full" aria-live="polite"
                   style="background:rgba(13,148,136,.12);color:var(--accent)"></span>
           </h2>
-          <button class="btn btn-ghost text-xs py-1.5 px-3.5 no-print" id="clear-all-btn"
-                  onclick="clearLog()" aria-label="Clear all logged foods">🗑 Clear all</button>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button class="btn btn-ghost text-xs py-1.5 px-3.5 no-print" onclick="openCustomFoodModal()" aria-label="Add custom food">✏ Custom</button>
+            <button class="btn btn-ghost text-xs py-1.5 px-3.5 no-print" onclick="exportCSV()" aria-label="Export log as CSV">📥 CSV</button>
+            <button class="btn btn-ghost text-xs py-1.5 px-3.5 no-print" id="clear-all-btn"
+                    onclick="clearLog()" aria-label="Clear all logged foods">🗑 Clear all</button>
+          </div>
         </div>
         <div id="food-log-container" aria-live="polite" aria-label="Food log"></div>
       </div>
@@ -486,6 +532,24 @@
   </div>
 </main>
 
+<!-- Lab Values Section -->
+<section class="max-w-7xl mx-auto px-4 pb-6 no-print" aria-labelledby="lab-heading">
+  <div class="glass p-5">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <div>
+        <h2 class="font-black flex items-center gap-2 text-base" id="lab-heading" style="color:var(--text)">
+          🧬 Lab Values Tracker
+        </h2>
+        <p class="text-xs font-600 mt-0.5" style="color:var(--muted)">Log your monthly bloodwork results — track trends over time</p>
+      </div>
+      <button class="btn btn-primary text-xs py-1.5 px-3.5" onclick="openLabModal()" aria-label="Add lab values">+ Add Lab Values</button>
+    </div>
+    <div id="lab-values-container" aria-live="polite">
+      <p class="text-sm font-600 py-4 text-center" style="color:var(--muted)">No lab values recorded yet. Add your bloodwork results to track trends.</p>
+    </div>
+  </div>
+</section>
+
 <!-- Serving Modal -->
 <div id="modal-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4"
      style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(5px)"
@@ -495,7 +559,14 @@
     <p class="text-xs mb-4 font-600" style="color:var(--muted)" id="modal-food-details"></p>
     <label class="block text-sm font-bold mb-1.5" style="color:var(--text)" for="serving-input">Serving size (grams)</label>
     <input id="serving-input" class="inp mb-2" type="number" min="1" max="2000" value="100" aria-describedby="serving-preview"/>
-    <p class="text-xs mb-4 font-700" style="color:var(--accent)" id="serving-preview" role="status"></p>
+    <p class="text-xs mb-3 font-700" style="color:var(--accent)" id="serving-preview" role="status"></p>
+    <label class="block text-sm font-bold mb-1.5" style="color:var(--text)" for="meal-type-modal">Meal</label>
+    <select id="meal-type-modal" class="inp mb-4" aria-label="Meal type">
+      <option value="breakfast">🌅 Breakfast</option>
+      <option value="lunch">☀️ Lunch</option>
+      <option value="dinner" selected>🌙 Dinner</option>
+      <option value="snack">🍎 Snack</option>
+    </select>
     <div class="flex gap-3">
       <button class="btn btn-ghost flex-1" onclick="closeModal()" aria-label="Cancel">Cancel</button>
       <button class="btn btn-primary flex-1" onclick="confirmAdd()" aria-label="Add to log">Add to Log ✓</button>
@@ -531,6 +602,16 @@
         <input id="lim-fl" class="inp" type="number" min="500" max="3000" aria-describedby="lim-fl-hint"/>
         <p id="lim-fl-hint" class="text-xs mt-0.5 font-600" style="color:var(--muted)">Standard dialysis limit: 1,500 mL</p>
       </div>
+      <div>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lim-cal">🔥 Calorie Goal (kcal)</label>
+        <input id="lim-cal" class="inp" type="number" min="1000" max="4000" aria-describedby="lim-cal-hint"/>
+        <p id="lim-cal-hint" class="text-xs mt-0.5 font-600" style="color:var(--muted)">Typical goal: 2,000 kcal</p>
+      </div>
+      <div>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lim-prot">💪 Protein Goal (g)</label>
+        <input id="lim-prot" class="inp" type="number" min="30" max="200" aria-describedby="lim-prot-hint"/>
+        <p id="lim-prot-hint" class="text-xs mt-0.5 font-600" style="color:var(--muted)">Dialysis target: ~80 g/day</p>
+      </div>
     </div>
     <div class="flex gap-3 mt-5">
       <button class="btn btn-ghost flex-1" onclick="closeLimitsModal()">Cancel</button>
@@ -539,19 +620,80 @@
   </div>
 </div>
 
+<!-- Custom Food Modal -->
+<div id="custom-food-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4"
+     style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(5px)"
+     role="dialog" aria-modal="true" aria-labelledby="custom-food-title">
+  <div class="glass p-6 w-full max-w-sm fade-in">
+    <h3 class="font-black text-lg mb-1" style="color:var(--text)" id="custom-food-title">✏ Add Custom Food</h3>
+    <p class="text-xs mb-4 font-600" style="color:var(--muted)">Enter nutrient values per 100 g</p>
+    <div class="space-y-2 mb-4">
+      <input id="cf-name" class="inp" type="text" placeholder="Food name" maxlength="60" aria-label="Food name"/>
+      <div class="custom-grid">
+        <div><label class="text-xs font-bold block mb-0.5" style="color:#0d9488" for="cf-k">K (mg)</label><input id="cf-k" class="inp" type="number" min="0" max="9999" placeholder="0" aria-label="Potassium mg per 100g"/></div>
+        <div><label class="text-xs font-bold block mb-0.5" style="color:#0891b2" for="cf-p">P (mg)</label><input id="cf-p" class="inp" type="number" min="0" max="9999" placeholder="0" aria-label="Phosphorus mg per 100g"/></div>
+        <div><label class="text-xs font-bold block mb-0.5" style="color:#ea580c" for="cf-na">Na (mg)</label><input id="cf-na" class="inp" type="number" min="0" max="9999" placeholder="0" aria-label="Sodium mg per 100g"/></div>
+        <div><label class="text-xs font-bold block mb-0.5" style="color:#0891b2" for="cf-fl">Fluid (mL)</label><input id="cf-fl" class="inp" type="number" min="0" max="9999" placeholder="0" aria-label="Fluid mL per 100g"/></div>
+        <div><label class="text-xs font-bold block mb-0.5" style="color:var(--muted)" for="cf-cal">Cal (kcal)</label><input id="cf-cal" class="inp" type="number" min="0" max="9999" placeholder="0" aria-label="Calories per 100g"/></div>
+        <div><label class="text-xs font-bold block mb-0.5" style="color:var(--muted)" for="cf-prot">Protein (g)</label><input id="cf-prot" class="inp" type="number" min="0" max="999" step="0.1" placeholder="0" aria-label="Protein g per 100g"/></div>
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <button class="btn btn-ghost flex-1" onclick="closeCustomFoodModal()">Cancel</button>
+      <button class="btn btn-primary flex-1" onclick="addCustomFood()">Add to Log ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lab Values Modal -->
+<div id="lab-modal-backdrop" class="fixed inset-0 z-50 items-center justify-center p-4"
+     style="display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(5px)"
+     role="dialog" aria-modal="true" aria-labelledby="lab-modal-title">
+  <div class="glass p-6 w-full max-w-sm fade-in">
+    <h3 class="font-black text-lg mb-1" style="color:var(--text)" id="lab-modal-title">🧬 Add Lab Values</h3>
+    <p class="text-xs mb-4 font-600" style="color:var(--muted)">Enter your most recent bloodwork results</p>
+    <div class="space-y-3">
+      <div>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lab-date">Date</label>
+        <input id="lab-date" class="inp" type="date" aria-label="Lab date"/>
+      </div>
+      <div>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lab-k">Potassium (mEq/L) <span style="color:var(--muted);font-weight:600;font-size:.78rem">normal: 3.5–5.0</span></label>
+        <input id="lab-k" class="inp" type="number" min="1" max="10" step="0.1" placeholder="e.g. 4.5" aria-label="Potassium lab value"/>
+      </div>
+      <div>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lab-p">Phosphorus (mg/dL) <span style="color:var(--muted);font-weight:600;font-size:.78rem">target: 3.5–5.5</span></label>
+        <input id="lab-p" class="inp" type="number" min="1" max="20" step="0.1" placeholder="e.g. 4.8" aria-label="Phosphorus lab value"/>
+      </div>
+      <div>
+        <label class="text-sm font-bold block mb-1" style="color:var(--text)" for="lab-alb">Albumin (g/dL) <span style="color:var(--muted);font-weight:600;font-size:.78rem">target: ≥ 4.0</span></label>
+        <input id="lab-alb" class="inp" type="number" min="1" max="10" step="0.1" placeholder="e.g. 3.8" aria-label="Albumin lab value"/>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button class="btn btn-ghost flex-1" onclick="closeLabModal()">Cancel</button>
+      <button class="btn btn-emerald flex-1" onclick="saveLabValues()">Save ✓</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── Constants ────────────────────────────────────────────────────────────────
-const DEFAULT_LIMITS = { k:2000, p:1000, na:2000, fluid:1500 };
+const DEFAULT_LIMITS = { k:2000, p:1000, na:2000, fluid:1500, cal:2000, protein:80 };
 
 const NUTRIENT_INFO = {
-  k:     { label:'Potassium',  unit:'mg', icon:'🫘', ringColor:['#34d399','#f59e0b','#ef4444'],
-           why:'Failing kidneys cannot remove potassium. High levels can cause dangerous heart arrhythmias and cardiac arrest.' },
-  p:     { label:'Phosphorus', unit:'mg', icon:'🧪', ringColor:['#34d399','#f59e0b','#ef4444'],
-           why:'Excess phosphorus draws calcium from bones, causing weak bones and artery calcification.' },
-  na:    { label:'Sodium',     unit:'mg', icon:'🧂', ringColor:['#34d399','#f59e0b','#ef4444'],
-           why:'Sodium causes thirst and fluid retention. Extra fluid between dialysis sessions raises blood pressure.' },
-  fluid: { label:'Fluid',      unit:'mL', icon:'💧', ringColor:['#34d399','#f59e0b','#ef4444'],
-           why:'Excess fluid builds up between dialysis sessions, causing shortness of breath, swelling, and cardiac stress.' },
+  k:       { label:'Potassium',  unit:'mg', icon:'🫘', goal:false,
+             why:'Failing kidneys cannot remove potassium. High levels can cause dangerous heart arrhythmias and cardiac arrest.' },
+  p:       { label:'Phosphorus', unit:'mg', icon:'🧪', goal:false,
+             why:'Excess phosphorus draws calcium from bones, causing weak bones and artery calcification.' },
+  na:      { label:'Sodium',     unit:'mg', icon:'🧂', goal:false,
+             why:'Sodium causes thirst and fluid retention. Extra fluid between dialysis sessions raises blood pressure.' },
+  fluid:   { label:'Fluid',      unit:'mL', icon:'💧', goal:false,
+             why:'Excess fluid builds up between dialysis sessions, causing shortness of breath, swelling, and cardiac stress.' },
+  cal:     { label:'Calories',   unit:'kcal', icon:'🔥', goal:true,
+             why:'Adequate calories prevent the body from breaking down muscle for energy — critical for dialysis patients who are at high risk of malnutrition.' },
+  protein: { label:'Protein',    unit:'g',   icon:'💪', goal:true,
+             why:'Dialysis removes protein. Patients need 1.2 g/kg/day (typically 70–90 g) to prevent muscle wasting, which is the #1 predictor of dialysis mortality.' },
 };
 
 const QUICK_FOODS = [
@@ -571,19 +713,29 @@ const QUICK_FOODS = [
   { name:"Olive oil (14 g / 1 tbsp)", k:0,   p:0,   na:0,   fluid:0,  cal:119, protein:0   },
 ];
 
+const MEAL_TYPES = {
+  breakfast: { label:'Breakfast', icon:'🌅', cls:'meal-breakfast' },
+  lunch:     { label:'Lunch',     icon:'☀️', cls:'meal-lunch' },
+  dinner:    { label:'Dinner',    icon:'🌙', cls:'meal-dinner' },
+  snack:     { label:'Snack',     icon:'🍎', cls:'meal-snack' },
+};
+
 // ─── State ────────────────────────────────────────────────────────────────────
-let LIMITS      = JSON.parse(localStorage.getItem('renalguide_limits') || 'null') || {...DEFAULT_LIMITS};
-let log         = [], nextId = 1, pendingFood = null;
-let prevTotals  = { k:0, p:0, na:0, fluid:0 };
-let recentFoods = JSON.parse(localStorage.getItem('renalguide_recent') || '[]');
+let LIMITS        = JSON.parse(localStorage.getItem('renalguide_limits') || 'null') || {...DEFAULT_LIMITS};
+let dialysisDay   = localStorage.getItem('renalguide_dialysis') === 'true';
+let log           = [], nextId = 1, pendingFood = null;
+let prevTotals    = { k:0, p:0, na:0, fluid:0 };
+let recentFoods   = JSON.parse(localStorage.getItem('renalguide_recent') || '[]');
+let labValues     = JSON.parse(localStorage.getItem('renalguide_labs') || '[]');
 
 const todayStr = () => new Date().toISOString().slice(0,10);
 let viewingDate = todayStr();
 const isToday   = () => viewingDate === todayStr();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const totals    = () => log.reduce((a,i)=>({k:a.k+i.k,p:a.p+i.p,na:a.na+i.na,fluid:a.fluid+i.fluid}),{k:0,p:0,na:0,fluid:0});
-const remaining = () => { const t=totals(); return {k:Math.max(0,LIMITS.k-t.k),p:Math.max(0,LIMITS.p-t.p),na:Math.max(0,LIMITS.na-t.na),fluid:Math.max(0,LIMITS.fluid-t.fluid)}; };
+const effectiveLimits = () => ({ ...LIMITS, fluid: dialysisDay ? 1000 : LIMITS.fluid });
+const totals    = () => log.reduce((a,i)=>({k:a.k+i.k,p:a.p+i.p,na:a.na+i.na,fluid:a.fluid+i.fluid,cal:a.cal+(i.cal||0),protein:a.protein+(i.protein||0)}),{k:0,p:0,na:0,fluid:0,cal:0,protein:0});
+const remaining = () => { const t=totals(),L=effectiveLimits(); return {k:Math.max(0,L.k-t.k),p:Math.max(0,L.p-t.p),na:Math.max(0,L.na-t.na),fluid:Math.max(0,L.fluid-t.fluid)}; };
 const scale     = (f,g) => { const r=g/100; return {k:+(f.k*r).toFixed(1),p:+(f.p*r).toFixed(1),na:+(f.na*r).toFixed(1),fluid:+(f.fluid*r).toFixed(1),cal:+(f.cal*r).toFixed(1),protein:+(f.protein*r).toFixed(1)}; };
 const pct       = (v,l) => Math.min(100,(v/l)*100);
 const barCls    = p => p>=100?'pbar-danger':p>=75?'pbar-warn':'pbar-safe';
@@ -624,6 +776,122 @@ function getDayCompliance(dateStr) {
   return t.k<=LIMITS.k && t.p<=LIMITS.p && t.na<=LIMITS.na && t.fluid<=LIMITS.fluid;
 }
 
+// ─── Lab Values ───────────────────────────────────────────────────────────────
+function openLabModal() {
+  document.getElementById('lab-date').value = todayStr();
+  const bd = document.getElementById('lab-modal-backdrop');
+  bd.style.display = 'flex';
+  setTimeout(()=>document.getElementById('lab-date').focus(),50);
+  trapFocus(bd);
+}
+function closeLabModal() { document.getElementById('lab-modal-backdrop').style.display='none'; }
+function saveLabValues() {
+  const date = document.getElementById('lab-date').value || todayStr();
+  const k    = parseFloat(document.getElementById('lab-k').value);
+  const p    = parseFloat(document.getElementById('lab-p').value);
+  const alb  = parseFloat(document.getElementById('lab-alb').value);
+  if (!k && !p && !alb) { toast('Enter at least one value','⚠️'); return; }
+  labValues.unshift({ date, k: k||null, p: p||null, alb: alb||null });
+  if (labValues.length > 12) labValues = labValues.slice(0,12);
+  localStorage.setItem('renalguide_labs', JSON.stringify(labValues));
+  closeLabModal(); renderLabValues(); toast('Lab values saved ✓','🧬');
+  ['lab-k','lab-p','lab-alb'].forEach(id=>document.getElementById(id).value='');
+}
+function trendArrow(curr, prev) {
+  if (!prev || !curr) return '';
+  const diff = curr - prev;
+  if (Math.abs(diff) < 0.1) return '<span class="trend-flat">→</span>';
+  return diff > 0 ? '<span class="trend-up">↑</span>' : '<span class="trend-down">↓</span>';
+}
+function labStatus(key, val) {
+  if (!val) return '';
+  if (key === 'k')   return val < 3.5 ? '⚠ Low' : val > 5.5 ? '🚨 High' : '✓';
+  if (key === 'p')   return val < 3.5 ? '⚠ Low' : val > 5.5 ? '🚨 High' : '✓';
+  if (key === 'alb') return val < 3.5 ? '🚨 Low' : val < 4.0 ? '⚠ Low-normal' : '✓';
+  return '';
+}
+function renderLabValues() {
+  const el = document.getElementById('lab-values-container');
+  if (!el) return;
+  if (!labValues.length) {
+    el.innerHTML = '<p class="text-sm font-600 py-4 text-center" style="color:var(--muted)">No lab values recorded yet. Add your bloodwork results to track trends.</p>';
+    return;
+  }
+  const rows = labValues.slice(0,6).map((entry,i)=>{
+    const prev = labValues[i+1];
+    const kCell  = entry.k   ? `<span class="lab-chip">${trendArrow(entry.k,  prev?.k)}  K: ${entry.k} <span style="color:var(--muted);font-weight:600">${labStatus('k',entry.k)}</span></span>` : '';
+    const pCell  = entry.p   ? `<span class="lab-chip">${trendArrow(entry.p,  prev?.p)}  P: ${entry.p} <span style="color:var(--muted);font-weight:600">${labStatus('p',entry.p)}</span></span>` : '';
+    const albCell= entry.alb ? `<span class="lab-chip">${trendArrow(entry.alb,prev?.alb)} Alb: ${entry.alb} <span style="color:var(--muted);font-weight:600">${labStatus('alb',entry.alb)}</span></span>` : '';
+    const label  = new Date(entry.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return `<div class="lab-entry fade-in">
+      <span class="text-xs font-800" style="color:var(--muted);min-width:72px">${label}</span>
+      <div class="flex flex-wrap gap-1.5">${kCell}${pCell}${albCell}</div>
+      <button onclick="removeLabEntry(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;min-width:24px" aria-label="Remove lab entry" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    </div>`;
+  }).join('');
+  el.innerHTML = rows;
+}
+function removeLabEntry(idx) {
+  labValues.splice(idx,1);
+  localStorage.setItem('renalguide_labs',JSON.stringify(labValues));
+  renderLabValues(); toast('Entry removed','🗑');
+}
+
+// ─── Custom Food ──────────────────────────────────────────────────────────────
+function openCustomFoodModal() {
+  if(!isToday())return;
+  const bd = document.getElementById('custom-food-backdrop');
+  bd.style.display='flex';
+  setTimeout(()=>document.getElementById('cf-name').focus(),50);
+  trapFocus(bd);
+}
+function closeCustomFoodModal() { document.getElementById('custom-food-backdrop').style.display='none'; }
+function addCustomFood() {
+  const name = document.getElementById('cf-name').value.trim();
+  if (!name) { toast('Enter a food name','⚠️'); return; }
+  const food = {
+    name,
+    k:       parseFloat(document.getElementById('cf-k').value)    || 0,
+    p:       parseFloat(document.getElementById('cf-p').value)    || 0,
+    na:      parseFloat(document.getElementById('cf-na').value)   || 0,
+    fluid:   parseFloat(document.getElementById('cf-fl').value)   || 0,
+    cal:     parseFloat(document.getElementById('cf-cal').value)  || 0,
+    protein: parseFloat(document.getElementById('cf-prot').value) || 0,
+  };
+  closeCustomFoodModal();
+  pendingFood = food;
+  document.getElementById('modal-food-name').textContent = food.name;
+  document.getElementById('modal-food-details').textContent = `Per 100 g — K:${food.k} mg · P:${food.p} mg · Na:${food.na} mg · Fluid:${food.fluid} mL`;
+  document.getElementById('serving-input').value = 100;
+  updateServingPreview();
+  const bd = document.getElementById('modal-backdrop'); bd.style.display='flex';
+  setTimeout(()=>document.getElementById('serving-input').focus(),50);
+  trapFocus(bd);
+  // Clear custom food fields
+  ['cf-name','cf-k','cf-p','cf-na','cf-fl','cf-cal','cf-prot'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
+}
+
+// ─── CSV Export ───────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!log.length) { toast('Nothing to export','ℹ️'); return; }
+  const name = document.getElementById('patient-name').value.trim() || 'Patient';
+  const headers = ['Food','Serving (g)','Meal','K (mg)','P (mg)','Na (mg)','Fluid (mL)','Cal (kcal)','Protein (g)'];
+  const rows = log.map(i => [
+    `"${i.name.replace(/"/g,'""')}"`, i.serving,
+    i.mealType ? MEAL_TYPES[i.mealType]?.label || i.mealType : '',
+    fmt(i.k), fmt(i.p), fmt(i.na), fmt(i.fluid), fmt(i.cal), fmt(i.protein,1)
+  ]);
+  const t = totals();
+  rows.push(['TOTAL','','', fmt(t.k), fmt(t.p), fmt(t.na), fmt(t.fluid), fmt(t.cal), fmt(t.protein,1)]);
+  const csv = [headers.join(','), ...rows.map(r=>r.join(','))].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `RenalGuide_${name}_${viewingDate}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('CSV downloaded','📥');
+}
+
 function getStreak() {
   let streak=0, d=new Date();
   for(let i=0;i<30;i++) {
@@ -658,8 +926,8 @@ function renderStreakAndWeek() {
 }
 
 function checkAllSafe() {
-  const t=totals();
-  const allSafe = isToday() && log.length>0 && t.k<=LIMITS.k && t.p<=LIMITS.p && t.na<=LIMITS.na && t.fluid<=LIMITS.fluid;
+  const t=totals(), L=effectiveLimits();
+  const allSafe = isToday() && log.length>0 && t.k<=L.k && t.p<=L.p && t.na<=L.na && t.fluid<=L.fluid;
   document.getElementById('all-safe-badge').style.display = allSafe ? '' : 'none';
 }
 
@@ -679,6 +947,52 @@ function renderGreeting() {
   const subMsg = sub[new Date().getDay() % sub.length];
   document.getElementById('greeting-text').textContent = name ? `${g}, ${name}! 👋` : `${g}! 👋`;
   document.getElementById('greeting-sub').textContent = subMsg;
+}
+
+// ─── Dialysis Day ─────────────────────────────────────────────────────────────
+function toggleDialysisDay() {
+  dialysisDay = !dialysisDay;
+  localStorage.setItem('renalguide_dialysis', dialysisDay);
+  const btn = document.getElementById('dialysis-day-btn');
+  const label = document.getElementById('dialysis-day-label');
+  const section = document.getElementById('greeting-section');
+  if (btn) { btn.classList.toggle('active', dialysisDay); btn.setAttribute('aria-pressed', dialysisDay ? 'true' : 'false'); }
+  if (label) label.style.display = dialysisDay ? '' : 'none';
+  if (section) section.classList.toggle('dialysis-active', dialysisDay);
+  renderAll();
+  toast(dialysisDay ? 'Dialysis Day on — fluid limit: 1,000 mL' : 'Dialysis Day off', dialysisDay ? '🩺' : '💧');
+}
+
+function applyDialysisDayUI() {
+  const btn = document.getElementById('dialysis-day-btn');
+  const label = document.getElementById('dialysis-day-label');
+  const section = document.getElementById('greeting-section');
+  if (btn) { btn.classList.toggle('active', dialysisDay); btn.setAttribute('aria-pressed', dialysisDay ? 'true' : 'false'); }
+  if (label) label.style.display = dialysisDay ? '' : 'none';
+  if (section) section.classList.toggle('dialysis-active', dialysisDay);
+}
+
+// ─── Health Score ─────────────────────────────────────────────────────────────
+function calculateHealthScore() {
+  if (!log.length) return null;
+  const t = totals(), L = effectiveLimits();
+  const overCount = [t.k > L.k, t.p > L.p, t.na > L.na, t.fluid > L.fluid].filter(Boolean).length;
+  const warnCount = [pct(t.k,L.k)>=75, pct(t.p,L.p)>=75, pct(t.na,L.na)>=75, pct(t.fluid,L.fluid)>=75].filter(Boolean).length;
+  if (overCount >= 3) return 'F';
+  if (overCount === 2) return 'D';
+  if (overCount === 1) return 'C';
+  if (warnCount >= 2) return 'B';
+  return 'A';
+}
+
+function renderHealthScore() {
+  const score = calculateHealthScore();
+  const el = document.getElementById('health-score-ring');
+  if (!el) return;
+  if (!score) { el.style.display = 'none'; return; }
+  const labels = { A:'Excellent', B:'Good', C:'Fair', D:'Poor', F:'Critical' };
+  el.style.display = '';
+  el.innerHTML = `<div class="score-ring score-${score}" title="Daily health score: ${labels[score]}" aria-label="Health score: ${score} — ${labels[score]}">${score}</div>`;
 }
 
 // ─── Confetti ─────────────────────────────────────────────────────────────────
@@ -772,12 +1086,21 @@ document.addEventListener('click',e=>{
 // ─── Render nutrient cards (ring style) ──────────────────────────────────────
 let prevAllSafe = false;
 function renderNutrientCards() {
-  const t=totals(), keys=['k','p','na','fluid'];
+  const t=totals(), L=effectiveLimits(), keys=['k','p','na','fluid','cal','protein'];
   document.getElementById('nutrient-cards').innerHTML=keys.map(key=>{
-    const info=NUTRIENT_INFO[key], val=t[key], lim=LIMITS[key];
-    const p=pct(val,lim), rem=Math.max(0,lim-val);
-    const rc=ringColor(p);
+    const info=NUTRIENT_INFO[key], val=t[key]||0, lim=L[key]||DEFAULT_LIMITS[key];
+    const p=pct(val,lim);
+    const isGoal=info.goal;
+    // For goal-type (cal/protein): green when approaching/meeting, grey when low
+    const goalPct = isGoal ? p : null;
+    const rc = isGoal ? (p>=100?'#0d9488':p>=50?'#10b981':'#9ca3af') : ringColor(p);
+    const badgeHtml = isGoal
+      ? (p>=100 ? `<span class="status-badge status-safe">✓ Goal met</span>` : p>=50 ? `<span class="status-badge" style="background:rgba(156,163,175,.15);color:var(--muted)">↑ In progress</span>` : `<span class="status-badge" style="background:rgba(156,163,175,.15);color:var(--muted)">↑ Keep eating</span>`)
+      : statusBadge(p);
+    const subLabel = isGoal ? `${fmt(Math.max(0,lim-val),key==='protein'?1:0)} ${info.unit} to goal` : `${fmt(Math.max(0,lim-val),key==='protein'?1:0)} ${info.unit} left`;
     const dash=p.toFixed(1), gap=(100-p).toFixed(1);
+    const barColor = isGoal ? (p>=100?'pbar-safe':p>=50?'pbar-safe':'pbar-safe') : barCls(p);
+    const ringStroke = isGoal ? rc : rc;
     return `<div class="glass p-4 fade-in" role="listitem" aria-label="${info.label}: ${fmt(val)} of ${lim} ${info.unit}">
       <div class="flex items-center gap-3">
         <div class="ring-wrap">
@@ -796,30 +1119,31 @@ function renderNutrientCards() {
               <div class="tooltip-content" role="tooltip">${info.why}</div>
             </div>
           </div>
-          <p class="text-2xl font-black leading-none" id="cnt-${key}" style="color:var(--text)">${fmt(val)}</p>
-          <p class="text-xs mt-0.5 font-600" style="color:var(--muted)">${fmt(rem)} ${info.unit} left</p>
+          <p class="text-2xl font-black leading-none" id="cnt-${key}" style="color:var(--text)">${fmt(val,key==='protein'?1:0)}</p>
+          <p class="text-xs mt-0.5 font-600" style="color:var(--muted)">${subLabel}</p>
         </div>
       </div>
-      <div class="mt-3">${statusBadge(p)}</div>
+      <div class="mt-3">${badgeHtml}</div>
       <div class="pbar-track mt-2" role="progressbar" aria-valuenow="${Math.round(val)}" aria-valuemin="0" aria-valuemax="${lim}" aria-label="${info.label} progress">
-        <div class="pbar-fill ${barCls(p)}" style="width:${p}%"></div>
+        <div class="pbar-fill ${isGoal?'pbar-safe':barCls(p)}" style="width:${p}%;${isGoal?'background:linear-gradient(90deg,#34d399,#10b981)':''}"></div>
       </div>
-      <p class="text-right text-xs mt-1 font-700" style="color:var(--muted)">${fmt(val)} / ${lim} ${info.unit}</p>
+      <p class="text-right text-xs mt-1 font-700" style="color:var(--muted)">${fmt(val,key==='protein'?1:0)} / ${lim} ${info.unit}</p>
     </div>`;
   }).join('');
-  keys.forEach(key=>{ const el=document.getElementById('cnt-'+key); if(el)animCounter(el,prevTotals[key]||0,t[key]); });
-  prevTotals={k:t.k,p:t.p,na:t.na,fluid:t.fluid};
+  keys.forEach(key=>{ const el=document.getElementById('cnt-'+key); if(el)animCounter(el,prevTotals[key]||0,t[key]||0); });
+  prevTotals={k:t.k,p:t.p,na:t.na,fluid:t.fluid,cal:t.cal||0,protein:t.protein||0};
 
   // Celebrate if all safe and wasn't before
-  const allSafe=isToday()&&log.length>0&&t.k<=LIMITS.k&&t.p<=LIMITS.p&&t.na<=LIMITS.na&&t.fluid<=LIMITS.fluid;
+  const allSafe=isToday()&&log.length>0&&t.k<=L.k&&t.p<=L.p&&t.na<=L.na&&t.fluid<=L.fluid;
   if(allSafe&&!prevAllSafe&&log.length>=2) launchConfetti();
   prevAllSafe=allSafe;
   checkAllSafe();
+  renderHealthScore();
 }
 
 // ─── Fluid cups ───────────────────────────────────────────────────────────────
 function renderFluidCups() {
-  const t=totals(), lim=LIMITS.fluid, used=Math.min(t.fluid,lim), CUP=250;
+  const t=totals(), lim=effectiveLimits().fluid, used=Math.min(t.fluid,lim), CUP=250;
   const total=Math.ceil(lim/CUP), filled=Math.floor(used/CUP), partial=(used%CUP)/CUP;
   let cups='';
   for(let i=0;i<total;i++) {
@@ -848,17 +1172,21 @@ function renderLog() {
   }
   const t=totals();
   const removeCol=isPast?'':'<th class="pb-2 pl-2"></th>';
+  const L=effectiveLimits();
   const rows=log.map(item=>{
+    const mt = item.mealType && MEAL_TYPES[item.mealType];
+    const mealBadge = mt ? `<span class="meal-badge ${mt.cls}">${mt.icon} ${mt.label}</span>` : '';
     const removeBtn=isPast?'':
       `<td class="py-2 pl-2"><button onclick="removeItem(${item.id})" aria-label="Remove ${item.name}" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-size:.9rem;min-width:28px;min-height:28px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">✕</button></td>`;
     return `<tr class="slide-in" style="border-bottom:1px solid var(--border)">
-      <td class="py-2 pr-2 text-sm font-bold" style="color:var(--text)">${item.name}</td>
+      <td class="py-2 pr-2" style="color:var(--text)"><p class="text-sm font-bold">${item.name}</p>${mealBadge}</td>
       <td class="py-2 pr-2 text-xs font-600" style="color:var(--muted)">${item.serving}g</td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(13,148,136,.12);color:#0d9488">${fmt(item.k)}</span></td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(6,182,212,.12);color:#0891b2">${fmt(item.p)}</span></td>
       <td class="py-2 pr-2 text-xs text-right"><span class="nbadge" style="background:rgba(249,115,22,.12);color:#ea580c">${fmt(item.na)}</span></td>
       <td class="py-2 pr-2 text-xs text-right font-600" style="color:var(--muted)">${fmt(item.fluid)}</td>
-      <td class="py-2 text-xs text-right font-600" style="color:var(--muted)">${fmt(item.cal)}</td>
+      <td class="py-2 pr-2 text-xs text-right font-600" style="color:var(--muted)">${fmt(item.cal)}</td>
+      <td class="py-2 text-xs text-right font-600" style="color:var(--muted)">${fmt(item.protein,1)}</td>
       ${removeBtn}
     </tr>`;
   }).join('');
@@ -870,17 +1198,19 @@ function renderLog() {
       <th class="pb-2 text-xs font-black pr-2 text-right" style="color:#0891b2" scope="col">P</th>
       <th class="pb-2 text-xs font-black pr-2 text-right" style="color:#ea580c" scope="col">Na</th>
       <th class="pb-2 text-xs font-black pr-2 text-right" style="color:var(--muted)" scope="col">Fluid</th>
-      <th class="pb-2 text-xs font-black text-right" style="color:var(--muted)" scope="col">Cal</th>
+      <th class="pb-2 text-xs font-black pr-2 text-right" style="color:var(--muted)" scope="col">Cal</th>
+      <th class="pb-2 text-xs font-black text-right" style="color:var(--muted)" scope="col">Prot</th>
       ${removeCol}
     </tr></thead>
     <tbody>${rows}</tbody>
     <tfoot><tr style="border-top:2px solid var(--border)">
       <td class="pt-2 text-sm font-black" style="color:var(--text)" colspan="2">Total</td>
-      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.k>LIMITS.k?'#ef4444':'#0d9488'}">${fmt(t.k)}</td>
-      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.p>LIMITS.p?'#ef4444':'#0891b2'}">${fmt(t.p)}</td>
-      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.na>LIMITS.na?'#ef4444':'#ea580c'}">${fmt(t.na)}</td>
-      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.fluid>LIMITS.fluid?'#ef4444':'var(--muted)'}">${fmt(t.fluid)}</td>
-      <td class="pt-2" colspan="${isPast?1:2}"></td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.k>L.k?'#ef4444':'#0d9488'}">${fmt(t.k)}</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.p>L.p?'#ef4444':'#0891b2'}">${fmt(t.p)}</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.na>L.na?'#ef4444':'#ea580c'}">${fmt(t.na)}</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:${t.fluid>L.fluid?'#ef4444':'var(--muted)'}">${fmt(t.fluid)}</td>
+      <td class="pt-2 text-xs text-right pr-2 font-black" style="color:var(--muted)">${fmt(t.cal)}</td>
+      <td class="pt-2 text-xs text-right font-black" style="color:var(--muted)" colspan="${isPast?1:2}">${fmt(t.protein||0,1)}</td>
     </tr></tfoot>
   </table></div>`;
 }
@@ -936,8 +1266,9 @@ function updateServingPreview(){
 }
 function confirmAdd(){
   const g=parseFloat(document.getElementById('serving-input').value)||100;
+  const mealType=document.getElementById('meal-type-modal')?.value||'dinner';
   const s=scale(pendingFood,g);
-  log.push({id:nextId++,name:pendingFood.name,serving:g,...s});
+  log.push({id:nextId++,name:pendingFood.name,serving:g,mealType,...s});
   addToRecent(pendingFood); closeModal(); saveLog(); renderAll();
   toast(`Added ${pendingFood.name}`,'🍽'); announce(`${pendingFood.name} added to log`);
 }
@@ -946,6 +1277,7 @@ function confirmAdd(){
 function openLimitsModal(){
   document.getElementById('lim-k').value=LIMITS.k; document.getElementById('lim-p').value=LIMITS.p;
   document.getElementById('lim-na').value=LIMITS.na; document.getElementById('lim-fl').value=LIMITS.fluid;
+  document.getElementById('lim-cal').value=LIMITS.cal||2000; document.getElementById('lim-prot').value=LIMITS.protein||80;
   const bd=document.getElementById('limits-backdrop'); bd.style.display='flex';
   setTimeout(()=>document.getElementById('lim-k').focus(),50); trapFocus(bd);
 }
@@ -955,6 +1287,8 @@ function saveLimits(){
   LIMITS.p=parseInt(document.getElementById('lim-p').value)||DEFAULT_LIMITS.p;
   LIMITS.na=parseInt(document.getElementById('lim-na').value)||DEFAULT_LIMITS.na;
   LIMITS.fluid=parseInt(document.getElementById('lim-fl').value)||DEFAULT_LIMITS.fluid;
+  LIMITS.cal=parseInt(document.getElementById('lim-cal').value)||DEFAULT_LIMITS.cal;
+  LIMITS.protein=parseInt(document.getElementById('lim-prot').value)||DEFAULT_LIMITS.protein;
   localStorage.setItem('renalguide_limits',JSON.stringify(LIMITS));
   closeLimitsModal(); renderAll(); toast('Limits updated ✓','⚙');
 }
@@ -1117,6 +1451,7 @@ function printLog(){
 function renderAll(){
   renderNutrientCards(); renderLog(); renderFluidCups();
   renderRecentFoods(); renderQuickAdd(); renderStreakAndWeek();
+  renderLabValues(); renderHealthScore();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -1133,6 +1468,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 
   viewingDate=todayStr(); loadLog(viewingDate); updateDateNav();
+  applyDialysisDayUI();
   renderGreeting(); renderQuickAdd(); renderAll();
 
   document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')searchFoods();});
@@ -1140,6 +1476,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('serving-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAdd();});
   document.getElementById('modal-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('modal-backdrop'))closeModal();});
   document.getElementById('limits-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('limits-backdrop'))closeLimitsModal();});
+  document.getElementById('custom-food-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('custom-food-backdrop'))closeCustomFoodModal();});
+  document.getElementById('lab-modal-backdrop').addEventListener('click',e=>{if(e.target===document.getElementById('lab-modal-backdrop'))closeLabModal();});
 });
 </script>
 </body>
